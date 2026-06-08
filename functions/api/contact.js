@@ -17,7 +17,7 @@ const escapeHtml = (value = '') =>
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
 export const onRequestPost = async ({ request, env }) => {
-  const apiKey = env.SENDGRID_API_KEY
+  const apiKey = env.RESEND_API_KEY
   const toEmail = env.CONTACT_TO_EMAIL
   const fromEmail = env.CONTACT_FROM_EMAIL
 
@@ -65,41 +65,23 @@ export const onRequestPost = async ({ request, env }) => {
     <p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>
   `
 
-  const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+  const resendResponse = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      personalizations: [
-        {
-          to: [{ email: toEmail }],
-        },
-      ],
-      from: {
-        email: fromEmail,
-        name: 'Abraham Godong Website',
-      },
-      reply_to: {
-        email,
-        name,
-      },
+      from: `Abraham Godong Website <${fromEmail}>`,
+      to: [toEmail],
+      reply_to: `${name} <${email}>`,
       subject,
-      content: [
-        {
-          type: 'text/plain',
-          value: text,
-        },
-        {
-          type: 'text/html',
-          value: html,
-        },
-      ],
+      text,
+      html,
     }),
   })
 
-  if (!sendGridResponse.ok) {
+  if (!resendResponse.ok) {
     return json({ error: 'Email could not be sent.' }, 502)
   }
 
