@@ -4,6 +4,16 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url)
 
+    if (url.pathname === '/api/contact/ip') {
+      return json({
+        ip:
+          request.headers.get('cf-connecting-ip') ||
+          request.headers.get('true-client-ip') ||
+          request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          '',
+      })
+    }
+
     if (url.pathname === '/api/contact') {
       if (request.method === 'POST') {
         return handleContactRequest(request, env)

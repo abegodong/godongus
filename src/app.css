@@ -94,6 +94,10 @@ textarea {
   color: var(--color-signature);
 }
 
+.signature-mark::before {
+  content: attr(data-signature);
+}
+
 .home-background::before,
 .home-background::after {
   content: "";

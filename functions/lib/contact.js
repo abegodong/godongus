@@ -16,12 +16,46 @@ const escapeHtml = (value = '') =>
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
+const getRequestIp = (request) => {
+  const forwardedFor = request.headers.get('x-forwarded-for') || ''
+
+  return (
+    request.headers.get('cf-connecting-ip') ||
+    request.headers.get('true-client-ip') ||
+    forwardedFor.split(',')[0]?.trim() ||
+    ''
+  )
+}
+
+const verifyTurnstile = async ({ secret, token, remoteIp }) => {
+  const formData = new FormData()
+  formData.append('secret', secret)
+  formData.append('response', token)
+
+  if (remoteIp) {
+    formData.append('remoteip', remoteIp)
+  }
+
+  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    return false
+  }
+
+  const result = await response.json()
+  return Boolean(result.success)
+}
+
 export const handleContactRequest = async (request, env) => {
   const apiKey = env.RESEND_API_KEY
   const toEmail = env.CONTACT_TO_EMAIL
   const fromEmail = env.CONTACT_FROM_EMAIL
+  const turnstileSecret = env.TURNSTILE_SECRET_KEY
 
-  if (!apiKey || !toEmail || !fromEmail) {
+  if (!apiKey || !toEmail || !fromEmail || !turnstileSecret) {
     return json({ error: 'Contact form is not configured.' }, 500)
   }
 
@@ -37,9 +71,27 @@ export const handleContactRequest = async (request, env) => {
   const email = String(payload.email || '').trim()
   const message = String(payload.message || '').trim()
   const company = String(payload.company || '').trim()
+  const submittedIp = String(payload.ipAddress || '').trim().slice(0, 120)
+  const turnstileToken = String(payload.turnstileToken || '').trim()
+  const requestIp = getRequestIp(request)
+  const ipAddress = requestIp || submittedIp || 'Unavailable'
 
   if (company) {
     return json({ ok: true })
+  }
+
+  if (!turnstileToken) {
+    return json({ error: 'Verification is required.' }, 400)
+  }
+
+  const turnstileValid = await verifyTurnstile({
+    secret: turnstileSecret,
+    token: turnstileToken,
+    remoteIp: requestIp || submittedIp,
+  })
+
+  if (!turnstileValid) {
+    return json({ error: 'Verification failed.' }, 400)
   }
 
   if (!name || !isValidEmail(email) || !message) {
@@ -54,6 +106,7 @@ export const handleContactRequest = async (request, env) => {
   const text = [
     `Name: ${name}`,
     `Email: ${email}`,
+    `IP address: ${ipAddress}`,
     '',
     'Message:',
     message,
@@ -61,6 +114,7 @@ export const handleContactRequest = async (request, env) => {
   const html = `
     <p><strong>Name:</strong> ${escapeHtml(name)}</p>
     <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+    <p><strong>IP address:</strong> ${escapeHtml(ipAddress)}</p>
     <p><strong>Message:</strong></p>
     <p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>
   `

@@ -12,6 +12,10 @@
   "observability": {
     "enabled": true
   },
+  "vars": {
+    "CONTACT_TO_EMAIL": "abraham@godong.us",
+    "CONTACT_FROM_EMAIL": "hello@godong.us"
+  },
   "compatibility_flags": [
     "nodejs_compat"
   ]

@@ -6,6 +6,9 @@
   import PageHeader from './lib/components/PageHeader.svelte'
   import SiteMenu from './lib/components/SiteMenu.svelte'
   import { insightPosts, knownRoutes, languages, siteName } from './lib/data/site.js'
+
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || ''
+
   const translations = {
     en: {
       nav: {
@@ -21,6 +24,7 @@
         items: [
           { href: '/', label: 'Return home' },
           { href: '/insights', label: 'Writing' },
+          { href: '/scuba-life', label: 'Scuba life' },
           { href: '/hello', label: 'Write to me' },
         ],
       },
@@ -31,6 +35,7 @@
         ],
         links: {
           insights: 'Read my writing',
+          scuba: 'See my scuba life',
           contact: 'Write to me',
         },
       },
@@ -59,6 +64,17 @@
         source: 'As posted in bumicakra.com',
         read: 'Read original',
         featured: 'Featured writing',
+      },
+      scuba: {
+        eyebrow: 'Scuba life',
+        title: 'Below the surface.',
+        intro:
+          'A place for notes, photos, and videos from my life as a scuba diver.',
+        source: 'Dive journal',
+        feedTitle: 'Photos, videos, and field notes',
+        feedBody:
+          'This page is ready for a first-party dive archive, so the photos and videos can live here cleanly without depending on a social feed.',
+        emptyState: 'Dive entries will appear here as the archive grows.',
       },
       error: {
         label: 'Error',
@@ -106,6 +122,12 @@
               'Writing prepared by Abraham Godong for Bumi Cakra Teknologi and GoJago on AI, software engineering, web strategy, security, accessibility, and human systems.',
             robots: 'index, follow',
           },
+          '/scuba-life': {
+            title: 'Scuba Life | Abraham Godong',
+            description:
+              'Scuba diving notes, photos, and underwater moments from Abraham Godong.',
+            robots: 'index, follow',
+          },
           '/style-guide': {
             title: 'Private Style Guide | Abraham Godong',
             description: 'A private visual style guide for Abraham Godong’s personal website.',
@@ -138,6 +160,7 @@
         items: [
           { href: '/', label: 'Kembali ke beranda' },
           { href: '/insights', label: 'Tulisan' },
+          { href: '/scuba-life', label: 'Kehidupan scuba' },
           { href: '/hello', label: 'Tulis pesan' },
         ],
       },
@@ -148,6 +171,7 @@
         ],
         links: {
           insights: 'Baca tulisan saya',
+          scuba: 'Lihat kehidupan scuba saya',
           contact: 'Tulis pesan',
         },
       },
@@ -175,6 +199,17 @@
         source: 'Seperti diposting di bumicakra.com',
         read: 'Baca tulisan asli',
         featured: 'Tulisan pilihan',
+      },
+      scuba: {
+        eyebrow: 'Kehidupan scuba',
+        title: 'Di bawah permukaan.',
+        intro:
+          'Tempat untuk catatan, foto, dan video dari kehidupan saya sebagai penyelam scuba.',
+        source: 'Jurnal penyelaman',
+        feedTitle: 'Foto, video, dan catatan lapangan',
+        feedBody:
+          'Halaman ini siap menjadi arsip penyelaman utama, sehingga foto dan video dapat hidup di sini tanpa bergantung pada feed sosial.',
+        emptyState: 'Catatan penyelaman akan muncul di sini saat arsip bertambah.',
       },
       error: {
         label: 'Error',
@@ -222,6 +257,12 @@
               'Tulisan yang disiapkan Abraham Godong untuk Bumi Cakra Teknologi dan GoJago tentang AI, software engineering, strategi web, keamanan, aksesibilitas, dan sistem manusia.',
             robots: 'index, follow',
           },
+          '/scuba-life': {
+            title: 'Kehidupan Scuba | Abraham Godong',
+            description:
+              'Catatan penyelaman, foto, dan momen bawah air dari Abraham Godong.',
+            robots: 'index, follow',
+          },
           '/style-guide': {
             title: 'Style Guide Pribadi | Abraham Godong',
             description: 'Panduan visual pribadi untuk situs Abraham Godong.',
@@ -254,6 +295,7 @@
         items: [
           { href: '/', label: 'Volver al inicio' },
           { href: '/insights', label: 'Escritos' },
+          { href: '/scuba-life', label: 'Vida de scuba' },
           { href: '/hello', label: 'Escríbeme' },
         ],
       },
@@ -264,6 +306,7 @@
         ],
         links: {
           insights: 'Lee mis escritos',
+          scuba: 'Ve mi vida de scuba',
           contact: 'Escríbeme',
         },
       },
@@ -291,6 +334,17 @@
         source: 'Publicado originalmente en bumicakra.com',
         read: 'Leer original',
         featured: 'Texto destacado',
+      },
+      scuba: {
+        eyebrow: 'Vida de scuba',
+        title: 'Bajo la superficie.',
+        intro:
+          'Un lugar para notas, fotos y videos de mi vida como buzo scuba.',
+        source: 'Diario de inmersiones',
+        feedTitle: 'Fotos, videos y notas de campo',
+        feedBody:
+          'Esta página está lista para convertirse en un archivo propio de inmersiones, para que las fotos y videos vivan aquí sin depender de un feed social.',
+        emptyState: 'Las entradas de buceo aparecerán aquí a medida que crezca el archivo.',
       },
       error: {
         label: 'Error',
@@ -338,6 +392,12 @@
               'Textos preparados por Abraham Godong para Bumi Cakra Teknologi y GoJago sobre AI, ingeniería de software, estrategia web, seguridad, accesibilidad y sistemas humanos.',
             robots: 'index, follow',
           },
+          '/scuba-life': {
+            title: 'Vida de Scuba | Abraham Godong',
+            description:
+              'Notas de buceo, fotos y momentos bajo el agua de Abraham Godong.',
+            robots: 'index, follow',
+          },
           '/style-guide': {
             title: 'Guía de Estilo Privada | Abraham Godong',
             description: 'Una guía visual privada para el sitio personal de Abraham Godong.',
@@ -370,6 +430,8 @@
     email: '',
     message: '',
     company: '',
+    ipAddress: '',
+    turnstileToken: '',
   }
   let menuOpen = false
   let languageMenuOpen = false
@@ -394,6 +456,11 @@
   let ContactPageComponent
   let ErrorPageComponent
   let InsightsPageComponent
+  let ScubaPageComponent
+  let turnstileLoadPromise
+  let turnstileWidgetId = null
+  let pendingTurnstileResolve
+  let pendingTurnstileReject
 
   $: t = translations[currentLanguage]
   $: lines = t.home.lines
@@ -471,6 +538,10 @@
       InsightsPageComponent = (await import('./lib/components/InsightsPage.svelte')).default
     }
 
+    if (nextPathname === '/scuba-life' && !ScubaPageComponent) {
+      ScubaPageComponent = (await import('./lib/components/ScubaPage.svelte')).default
+    }
+
     if ((nextPathname === '/404' || nextPathname === '/500' || !knownRoutes.includes(nextPathname)) && !ErrorPageComponent) {
       ErrorPageComponent = (await import('./lib/components/ErrorPage.svelte')).default
     }
@@ -530,12 +601,127 @@
       contactSubmitted = false
       contactStatus = 'idle'
       contactError = ''
+      contactForm = {
+        ...contactForm,
+        turnstileToken: '',
+      }
     }
 
     if (nextPathname === '/404' || nextPathname === '/500' || !knownRoutes.includes(nextPathname)) {
       quoteIndex = Math.floor(Math.random() * errorQuotes.length)
       visibleQuoteIndex = quoteIndex
       quoteVisible = true
+    }
+  }
+
+  const loadTurnstile = () => {
+    if (!turnstileSiteKey) {
+      return Promise.reject(new Error('Turnstile site key is not configured'))
+    }
+
+    if (window.turnstile) {
+      return Promise.resolve(window.turnstile)
+    }
+
+    if (!turnstileLoadPromise) {
+      turnstileLoadPromise = new Promise((resolve, reject) => {
+        const existingScript = document.querySelector('script[data-turnstile-script]')
+
+        if (existingScript) {
+          existingScript.addEventListener('load', () => resolve(window.turnstile), { once: true })
+          existingScript.addEventListener('error', reject, { once: true })
+          return
+        }
+
+        const script = document.createElement('script')
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+        script.async = true
+        script.defer = true
+        script.dataset.turnstileScript = 'true'
+        script.addEventListener('load', () => resolve(window.turnstile), { once: true })
+        script.addEventListener('error', reject, { once: true })
+        document.head.appendChild(script)
+      })
+    }
+
+    return turnstileLoadPromise
+  }
+
+  const getTurnstileToken = async () => {
+    const turnstile = await loadTurnstile()
+    const turnstileElement = document.getElementById('contact-turnstile')
+
+    if (!turnstileElement) {
+      throw new Error('Turnstile element is missing')
+    }
+
+    if (turnstileWidgetId === null) {
+      turnstileWidgetId = turnstile.render(turnstileElement, {
+        sitekey: turnstileSiteKey,
+        size: 'invisible',
+        callback: (token) => {
+          contactForm = {
+            ...contactForm,
+            turnstileToken: token,
+          }
+
+          pendingTurnstileResolve?.(token)
+          pendingTurnstileResolve = undefined
+          pendingTurnstileReject = undefined
+        },
+        'expired-callback': () => {
+          contactForm = {
+            ...contactForm,
+            turnstileToken: '',
+          }
+        },
+        'error-callback': () => {
+          pendingTurnstileReject?.(new Error('Turnstile verification failed'))
+          pendingTurnstileResolve = undefined
+          pendingTurnstileReject = undefined
+        },
+      })
+    } else {
+      turnstile.reset(turnstileWidgetId)
+    }
+
+    return new Promise((resolve, reject) => {
+      const turnstileTimeout = window.setTimeout(() => {
+        pendingTurnstileResolve = undefined
+        pendingTurnstileReject = undefined
+        reject(new Error('Turnstile verification timed out'))
+      }, 10000)
+
+      pendingTurnstileResolve = (token) => {
+        window.clearTimeout(turnstileTimeout)
+        resolve(token)
+      }
+      pendingTurnstileReject = (error) => {
+        window.clearTimeout(turnstileTimeout)
+        reject(error)
+      }
+      turnstile.execute(turnstileWidgetId)
+    })
+  }
+
+  const loadContactIp = async () => {
+    try {
+      const response = await fetch('/api/contact/ip')
+
+      if (!response.ok) {
+        return
+      }
+
+      const payload = await response.json()
+      contactForm = {
+        ...contactForm,
+        ipAddress: String(payload.ip || ''),
+      }
+    } catch (error) {
+      contactForm = {
+        ...contactForm,
+        ipAddress: '',
+      }
     }
   }
 
@@ -649,6 +835,7 @@
     }
 
     updatePathname()
+    loadContactIp()
     window.addEventListener('popstate', updatePathname)
     window.addEventListener('keydown', closeMenuOnEscape)
     window.addEventListener('click', closeLanguageMenu)
@@ -688,6 +875,8 @@
     contactError = ''
 
     try {
+      const turnstileToken = await getTurnstileToken()
+
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
@@ -698,6 +887,8 @@
           email: contactForm.email,
           message: contactForm.message,
           company: contactForm.company,
+          ipAddress: contactForm.ipAddress,
+          turnstileToken,
         }),
       })
 
@@ -712,6 +903,8 @@
         email: '',
         message: '',
         company: '',
+        ipAddress: contactForm.ipAddress,
+        turnstileToken: '',
       }
     } catch (error) {
       contactStatus = 'idle'
@@ -720,7 +913,7 @@
   }
 </script>
 
-<section
+<main
   class={[
     'relative flex min-h-svh items-center justify-center overflow-hidden bg-[var(--color-background)] pl-6 pr-[calc(var(--signature-size)+2rem)] text-[var(--color-text-primary)]',
     pathname === '/' ? 'home-background' : '',
@@ -758,9 +951,8 @@
   <div
     class="pointer-events-none fixed right-0 top-1/2 z-[1] -translate-y-1/2 whitespace-nowrap text-[length:var(--signature-size)] font-semibold uppercase leading-none signature-mark [writing-mode:vertical-rl]"
     aria-hidden="true"
-  >
-    ABRAHAM GODONG
-  </div>
+    data-signature="ABRAHAM GODONG"
+  ></div>
 
   <SiteMenu
     {t}
@@ -787,6 +979,7 @@
         {contactSubmitted}
         {contactStatus}
         {contactError}
+        {turnstileSiteKey}
         onSubmit={submitContact}
         onReset={() => {
           contactSubmitted = false
@@ -797,6 +990,10 @@
   {:else if pathname === '/insights'}
     {#if InsightsPageComponent}
       <svelte:component this={InsightsPageComponent} {t} posts={insightPosts} />
+    {/if}
+  {:else if pathname === '/scuba-life'}
+    {#if ScubaPageComponent}
+      <svelte:component this={ScubaPageComponent} {t} />
     {/if}
   {:else if pathname === '/style-guide'}
     <div class="relative z-10 flex w-full max-w-5xl flex-col gap-12 pb-16 pt-24 md:pt-28">
@@ -1032,4 +1229,4 @@
   {/if}
   {/key}
   </div>
-</section>
+</main>

@@ -7,6 +7,7 @@
   export let contactStatus
   export let contactError
   export let contactForm
+  export let turnstileSiteKey = ''
   export let onSubmit
   export let onReset
 </script>
@@ -69,6 +70,8 @@
           Company
           <input name="company" tabindex="-1" autocomplete="off" bind:value={contactForm.company} />
         </label>
+        <input type="hidden" name="ipAddress" bind:value={contactForm.ipAddress} />
+        <input type="hidden" name="turnstileToken" bind:value={contactForm.turnstileToken} />
 
         <label class="grid gap-2">
           <span class="text-sm font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
@@ -86,6 +89,10 @@
           <p class="text-sm font-semibold text-[var(--color-accent-hover)]" role="alert">
             {contactError}
           </p>
+        {/if}
+
+        {#if turnstileSiteKey}
+          <div id="contact-turnstile" class="sr-only" aria-hidden="true"></div>
         {/if}
 
         <button
