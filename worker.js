@@ -14,6 +14,12 @@ export default {
       })
     }
 
+    if (url.pathname === '/api/contact/config') {
+      return json({
+        turnstileSiteKey: env.TURNSTILE_SITE_KEY || '',
+      })
+    }
+
     if (url.pathname === '/api/contact') {
       if (request.method === 'POST') {
         return handleContactRequest(request, env)

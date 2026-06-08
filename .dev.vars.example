@@ -2,4 +2,5 @@ RESEND_API_KEY=re_your_resend_api_key
 CONTACT_TO_EMAIL=abraham@godong.us
 CONTACT_FROM_EMAIL=hello@your-verified-domain.com
 TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
+TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 VITE_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key

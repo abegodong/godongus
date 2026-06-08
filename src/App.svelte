@@ -7,7 +7,7 @@
   import SiteMenu from './lib/components/SiteMenu.svelte'
   import { insightPosts, knownRoutes, languages, siteName } from './lib/data/site.js'
 
-  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || ''
+  const initialTurnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || ''
 
   const translations = {
     en: {
@@ -425,6 +425,7 @@
   let contactSubmitted = false
   let contactStatus = 'idle'
   let contactError = ''
+  let turnstileSiteKey = initialTurnstileSiteKey
   let contactForm = {
     name: '',
     email: '',
@@ -614,7 +615,9 @@
     }
   }
 
-  const loadTurnstile = () => {
+  const loadTurnstile = async () => {
+    await loadContactConfig()
+
     if (!turnstileSiteKey) {
       return Promise.reject(new Error('Turnstile site key is not configured'))
     }
@@ -722,6 +725,25 @@
         ...contactForm,
         ipAddress: '',
       }
+    }
+  }
+
+  const loadContactConfig = async () => {
+    if (turnstileSiteKey) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/contact/config')
+
+      if (!response.ok) {
+        return
+      }
+
+      const payload = await response.json()
+      turnstileSiteKey = String(payload.turnstileSiteKey || '')
+    } catch (error) {
+      turnstileSiteKey = ''
     }
   }
 
@@ -835,6 +857,7 @@
     }
 
     updatePathname()
+    loadContactConfig()
     loadContactIp()
     window.addEventListener('popstate', updatePathname)
     window.addEventListener('keydown', closeMenuOnEscape)

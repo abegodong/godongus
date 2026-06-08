@@ -14,7 +14,8 @@
   },
   "vars": {
     "CONTACT_TO_EMAIL": "abraham@godong.us",
-    "CONTACT_FROM_EMAIL": "hello@godong.us"
+    "CONTACT_FROM_EMAIL": "hello@godong.us",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAADgxzD1o56l4-iSB"
   },
   "compatibility_flags": [
     "nodejs_compat"
