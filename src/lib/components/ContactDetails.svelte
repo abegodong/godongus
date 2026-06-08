@@ -1,7 +1,7 @@
 <script>
   export let t
 
-  const emailParts = ['abraham', 'godong.us']
+  const emailParts = ['hello', 'godong.net']
   const phoneParts = ['206', '922', '4500']
 
   const email = emailParts.join('@')

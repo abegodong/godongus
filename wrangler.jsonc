@@ -13,7 +13,7 @@
     "enabled": true
   },
   "vars": {
-    "CONTACT_TO_EMAIL": "abraham@godong.us",
+    "CONTACT_TO_EMAIL": "hello@godong.net",
     "CONTACT_FROM_EMAIL": "hello@godong.us",
     "TURNSTILE_SITE_KEY": "0x4AAAAAADgxzD1o56l4-iSB"
   },
