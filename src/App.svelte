@@ -595,7 +595,8 @@
       typedLines = typedLines
 
       if (letterIndex < lines[lineIndex].length - 1) {
-        letterTimer = window.setTimeout(() => typeLine(lineIndex, letterIndex + 1), 38)
+        const typingDelay = lineIndex === 0 ? 38 : 10
+        letterTimer = window.setTimeout(() => typeLine(lineIndex, letterIndex + 1), typingDelay)
         return
       }
 
