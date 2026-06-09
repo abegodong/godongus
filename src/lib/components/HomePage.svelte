@@ -40,7 +40,11 @@
     <a class="slide-link text-sm font-semibold uppercase tracking-widest" href="/insights">
       {t.home.links.insights}
     </a>
-    <a class="slide-link text-sm font-semibold uppercase tracking-widest" href="/scuba-life">
+    <a
+      class="slide-link text-sm font-semibold uppercase tracking-widest"
+      href="/salish-sea-diving"
+      on:click={(event) => onNavigate(event, '/salish-sea-diving')}
+    >
       {t.home.links.scuba}
     </a>
     <a

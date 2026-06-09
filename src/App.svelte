@@ -24,7 +24,7 @@
         items: [
           { href: '/', label: 'Return home' },
           { href: '/insights', label: 'Writing' },
-          { href: '/scuba-life', label: 'PNW diving guide' },
+          { href: '/salish-sea-diving', label: 'Salish Sea diving' },
           { href: '/hello', label: 'Write to me' },
         ],
       },
@@ -35,7 +35,7 @@
         ],
         links: {
           insights: 'Read my writing',
-          scuba: 'Read my diving guide',
+          scuba: 'Salish Sea diving',
           contact: 'Write to me',
         },
       },
@@ -66,7 +66,7 @@
         featured: 'Featured writing',
       },
       scuba: {
-        eyebrow: 'PNW diving guide',
+        eyebrow: 'Salish Sea diving',
         title: 'Diving the Pacific Northwest.',
         intro:
           'A field guide for divers making the leap into cold Pacific Northwest water, written and photographed from my own experience in the Salish Sea.',
@@ -122,7 +122,7 @@
               'Writing prepared by Abraham Godong for Bumi Cakra Teknologi and GoJago on AI, software engineering, web strategy, security, accessibility, and human systems.',
             robots: 'index, follow',
           },
-          '/scuba-life': {
+          '/salish-sea-diving': {
             title: 'Diving the Pacific Northwest | Abraham Godong',
             description:
               'A Pacific Northwest diving field guide by Abraham Godong, with practical notes on cold-water training, gear, tides, local sites, and Puget Sound marine life.',
@@ -160,7 +160,7 @@
         items: [
           { href: '/', label: 'Kembali ke beranda' },
           { href: '/insights', label: 'Tulisan' },
-          { href: '/scuba-life', label: 'Panduan diving PNW' },
+          { href: '/salish-sea-diving', label: 'Salish Sea diving' },
           { href: '/hello', label: 'Tulis pesan' },
         ],
       },
@@ -171,7 +171,7 @@
         ],
         links: {
           insights: 'Baca tulisan saya',
-          scuba: 'Baca panduan diving saya',
+          scuba: 'Salish Sea diving',
           contact: 'Tulis pesan',
         },
       },
@@ -201,7 +201,7 @@
         featured: 'Tulisan pilihan',
       },
       scuba: {
-        eyebrow: 'Panduan diving PNW',
+        eyebrow: 'Salish Sea diving',
         title: 'Menyelam di Pacific Northwest.',
         intro:
           'Panduan lapangan untuk penyelam yang mulai masuk ke air dingin Pacific Northwest, ditulis dan difoto dari pengalaman saya sendiri di Salish Sea.',
@@ -257,7 +257,7 @@
               'Tulisan yang disiapkan Abraham Godong untuk Bumi Cakra Teknologi dan GoJago tentang AI, software engineering, strategi web, keamanan, aksesibilitas, dan sistem manusia.',
             robots: 'index, follow',
           },
-          '/scuba-life': {
+          '/salish-sea-diving': {
             title: 'Menyelam di Pacific Northwest | Abraham Godong',
             description:
               'Panduan diving Pacific Northwest oleh Abraham Godong, dengan catatan praktis tentang latihan air dingin, perlengkapan, pasang surut, lokasi lokal, dan kehidupan laut Puget Sound.',
@@ -295,7 +295,7 @@
         items: [
           { href: '/', label: 'Volver al inicio' },
           { href: '/insights', label: 'Escritos' },
-          { href: '/scuba-life', label: 'Guía de buceo PNW' },
+          { href: '/salish-sea-diving', label: 'Salish Sea diving' },
           { href: '/hello', label: 'Escríbeme' },
         ],
       },
@@ -306,7 +306,7 @@
         ],
         links: {
           insights: 'Lee mis escritos',
-          scuba: 'Lee mi guía de buceo',
+          scuba: 'Salish Sea diving',
           contact: 'Escríbeme',
         },
       },
@@ -336,7 +336,7 @@
         featured: 'Texto destacado',
       },
       scuba: {
-        eyebrow: 'Guía de buceo PNW',
+        eyebrow: 'Salish Sea diving',
         title: 'Bucear el Pacific Northwest.',
         intro:
           'Una guía de campo para buzos que dan el salto al agua fría del Pacific Northwest, escrita y fotografiada desde mi propia experiencia en el Salish Sea.',
@@ -392,7 +392,7 @@
               'Textos preparados por Abraham Godong para Bumi Cakra Teknologi y GoJago sobre AI, ingeniería de software, estrategia web, seguridad, accesibilidad y sistemas humanos.',
             robots: 'index, follow',
           },
-          '/scuba-life': {
+          '/salish-sea-diving': {
             title: 'Bucear el Pacific Northwest | Abraham Godong',
             description:
               'Una guía de buceo del Pacific Northwest por Abraham Godong, con notas prácticas sobre entrenamiento en agua fría, equipo, mareas, sitios locales y vida marina de Puget Sound.',
@@ -539,7 +539,7 @@
       InsightsPageComponent = (await import('./lib/components/InsightsPage.svelte')).default
     }
 
-    if (nextPathname === '/scuba-life' && !ScubaPageComponent) {
+    if (nextPathname === '/salish-sea-diving' && !ScubaPageComponent) {
       ScubaPageComponent = (await import('./lib/components/ScubaPage.svelte')).default
     }
 
@@ -939,7 +939,7 @@
 <main
   class={[
     'relative flex min-h-svh items-center justify-center overflow-hidden bg-[var(--color-background)] pl-6 text-[var(--color-text-primary)]',
-    pathname === '/scuba-life' ? 'pr-6' : 'pr-[calc(var(--signature-size)+2rem)]',
+    pathname === '/salish-sea-diving' ? 'pr-6' : 'pr-[calc(var(--signature-size)+2rem)]',
     pathname === '/' ? 'home-background' : '',
   ]}
   style="--signature-size: clamp(2.5rem, 10svh, 7rem)"
@@ -972,7 +972,7 @@
     onChangeLanguage={changeLanguage}
   />
 
-  {#if pathname !== '/scuba-life'}
+  {#if pathname !== '/salish-sea-diving'}
     <div
       class="pointer-events-none fixed right-0 top-1/2 z-[1] -translate-y-1/2 whitespace-nowrap text-[length:var(--signature-size)] font-semibold uppercase leading-none signature-mark [writing-mode:vertical-rl]"
       aria-hidden="true"
@@ -1017,7 +1017,7 @@
     {#if InsightsPageComponent}
       <svelte:component this={InsightsPageComponent} {t} posts={insightPosts} />
     {/if}
-  {:else if pathname === '/scuba-life'}
+  {:else if pathname === '/salish-sea-diving'}
     {#if ScubaPageComponent}
       <svelte:component this={ScubaPageComponent} {t} />
     {/if}

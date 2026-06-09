@@ -291,7 +291,7 @@
   <div class="grid gap-10 lg:block lg:pl-72" bind:this={guideBodyElement}>
     <aside
       class={[
-        'hidden lg:fixed lg:left-[max(2rem,calc((100vw-72rem)/2))] lg:top-24 lg:z-20 lg:block lg:w-56 lg:transition lg:duration-300',
+        'hidden lg:fixed lg:left-[max(2rem,calc((100vw-72rem)/2))] lg:top-24 lg:z-20 lg:block lg:w-52 lg:transition lg:duration-300',
         contentsVisible ? 'lg:translate-y-0 lg:opacity-100' : 'lg:pointer-events-none lg:translate-y-3 lg:opacity-0',
       ]}
     >
@@ -305,7 +305,7 @@
         <ol class="mt-5 grid gap-3">
           {#each guide.toc as item}
             <li>
-              <a class="text-sm leading-snug text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]" href={`#${item.id}`}>
+              <a class="text-xs leading-relaxed text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]" href={`#${item.id}`}>
                 {item.text}
               </a>
             </li>
@@ -350,12 +350,12 @@
     margin-top: 5.5rem;
     border: 1px solid rgb(16 32 30 / 0.92);
     background: var(--color-text-primary);
-    padding: clamp(1.1rem, 2.4vw, 1.6rem);
+    padding: clamp(0.95rem, 1.8vw, 1.3rem);
     font-family: "Cormorant Garamond Variable", Cormorant, Garamond, serif;
-    font-size: clamp(2rem, 4.2vw, 3.4rem);
+    font-size: clamp(1.8rem, 3.4vw, 3rem);
     font-style: italic;
     font-weight: 600;
-    line-height: 1;
+    line-height: 1.05;
     color: var(--color-background);
   }
 
@@ -369,6 +369,7 @@
 
   .scuba-guide :global(h3) {
     margin-top: 2.5rem;
+    max-width: 66ch;
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -378,6 +379,7 @@
 
   .scuba-guide :global(h4) {
     margin-top: 2.25rem;
+    max-width: 42ch;
     font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 650;
     line-height: 1.15;
@@ -385,18 +387,20 @@
 
   .scuba-guide :global(p),
   .scuba-guide :global(li) {
+    max-width: 66ch;
     font-size: clamp(1.06rem, 1.8vw, 1.2rem);
     line-height: 1.78;
-    color: var(--color-text-secondary);
+    color: rgb(49 67 63);
   }
 
   .scuba-guide :global(p) {
-    margin-top: 1.15rem;
+    margin-top: 1.25rem;
   }
 
   .scuba-guide :global(ul),
   .scuba-guide :global(ol) {
     margin-top: 1.25rem;
+    max-width: 66ch;
     padding-left: 1.4rem;
   }
 
@@ -501,13 +505,21 @@
   }
 
   .scuba-guide :global(td) {
-    color: var(--color-text-secondary);
+    color: rgb(49 67 63);
   }
 
   .scuba-guide-notes {
     margin-top: 5rem;
+    max-width: 66ch;
     border-top: 1px solid var(--color-border);
     padding-top: 2.5rem;
+  }
+
+  @media (max-width: 900px) {
+    .scuba-guide :global(h2) {
+      margin-top: 4.25rem;
+      padding: 0.9rem 1rem;
+    }
   }
 
   @media (min-width: 760px) {
