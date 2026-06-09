@@ -67,9 +67,16 @@
       },
       scuba: {
         eyebrow: 'Salish Sea diving',
+        byline: 'Written by Abraham Godong',
         title: 'Diving the Pacific Northwest.',
         intro:
           'A field guide for divers making the leap into cold Pacific Northwest water, written and photographed from my own experience in the Salish Sea.',
+        heroCaption: 'A shareable field guide for divers making the leap into cold Pacific Northwest water.',
+        jumpToPart: 'Jump to a part',
+        partNavigation: 'Salish Sea diving guide parts',
+        tableOfContents: 'Salish Sea diving guide table of contents',
+        contents: 'Contents',
+        sourcesAndNotes: 'Sources and Notes',
         source: 'Dive journal',
         feedTitle: 'Photos, videos, and field notes',
         feedBody:
@@ -202,9 +209,16 @@
       },
       scuba: {
         eyebrow: 'Salish Sea diving',
+        byline: 'Ditulis oleh Abraham Godong',
         title: 'Menyelam di Pacific Northwest.',
         intro:
           'Panduan lapangan untuk penyelam yang mulai masuk ke air dingin Pacific Northwest, ditulis dan difoto dari pengalaman saya sendiri di Salish Sea.',
+        heroCaption: 'Panduan lapangan yang dapat dibagikan untuk penyelam yang mulai masuk ke air dingin Pacific Northwest.',
+        jumpToPart: 'Lompat ke bagian',
+        partNavigation: 'Bagian panduan Salish Sea diving',
+        tableOfContents: 'Daftar isi panduan Salish Sea diving',
+        contents: 'Daftar isi',
+        sourcesAndNotes: 'Sumber dan Catatan',
         source: 'Jurnal penyelaman',
         feedTitle: 'Foto, video, dan catatan lapangan',
         feedBody:
@@ -337,9 +351,16 @@
       },
       scuba: {
         eyebrow: 'Salish Sea diving',
+        byline: 'Escrito por Abraham Godong',
         title: 'Bucear el Pacific Northwest.',
         intro:
           'Una guía de campo para buzos que dan el salto al agua fría del Pacific Northwest, escrita y fotografiada desde mi propia experiencia en el Salish Sea.',
+        heroCaption: 'Una guía de campo para compartir con buzos que dan el salto al agua fría del Pacific Northwest.',
+        jumpToPart: 'Ir a una parte',
+        partNavigation: 'Partes de la guía de Salish Sea diving',
+        tableOfContents: 'Tabla de contenidos de la guía de Salish Sea diving',
+        contents: 'Contenidos',
+        sourcesAndNotes: 'Fuentes y Notas',
         source: 'Diario de inmersiones',
         feedTitle: 'Fotos, videos y notas de campo',
         feedBody:
@@ -1019,7 +1040,7 @@
     {/if}
   {:else if pathname === '/salish-sea-diving'}
     {#if ScubaPageComponent}
-      <svelte:component this={ScubaPageComponent} {t} />
+      <svelte:component this={ScubaPageComponent} {t} {currentLanguage} />
     {/if}
   {:else if pathname === '/style-guide'}
     <div class="relative z-10 flex w-full max-w-5xl flex-col gap-12 pb-16 pt-24 md:pt-28">

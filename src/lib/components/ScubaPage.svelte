@@ -1,11 +1,30 @@
 <script>
   import { onMount, tick } from 'svelte'
-  import guideMarkdown from '../data/pnw-diving-field-guide.md?raw'
+  import guideMarkdownEn from '../data/pnw-diving-field-guide.md?raw'
+  import guideMarkdownEs from '../data/pnw-diving-field-guide.es.md?raw'
+  import guideMarkdownId from '../data/pnw-diving-field-guide.id.md?raw'
 
   export let t
+  export let currentLanguage = 'en'
 
   const imageBase = '/images/scuba/'
   const slugCounts = new Map()
+  const guideMarkdownByLanguage = {
+    en: guideMarkdownEn,
+    es: guideMarkdownEs,
+    id: guideMarkdownId,
+  }
+  const stableHeadingIds = [
+    'preface',
+    'part-1-why-the-salish-sea',
+    'part-2-getting-started-three-ways-in',
+    'part-3-demystifying-the-gear-configurations-and-which-are-actually-yours-to-make',
+    'part-4-where-to-plug-in-shops-clubs-and-community',
+    'part-5-reading-the-water-tides-slack-and-conditions',
+    'part-6-the-cast-critters-of-puget-sound',
+    'part-7-where-to-dive-a-difficulty-progression',
+    'part-8-the-certification-ladder-where-to-go-next',
+  ]
 
   const escapeHtml = (value = '') =>
     String(value)
@@ -70,6 +89,19 @@
     return `<${ordered ? 'ol' : 'ul'}>${items.join('')}</${ordered ? 'ol' : 'ul'}>`
   }
 
+  const getPartLabel = (item) => {
+    const textMatch = item.text.match(/^(Part|Bagian|Parte)\s+(\d+)/i)
+    if (textMatch) return `${textMatch[1]} ${textMatch[2]}`
+
+    const idMatch = item.id.match(/^part-(\d+)/)
+    return idMatch ? `Part ${idMatch[1]}` : item.text
+  }
+
+  const isGuideNote = (value = '') =>
+    /^\*(One note before we begin|Satu catatan sebelum kita mulai|Una nota antes de comenzar):/i.test(value)
+
+  const isSummaryHeading = (value = '') => /^(Summary|Ringkasan|Resumen)$/i.test(value)
+
   const parseGuide = (markdown) => {
     slugCounts.clear()
 
@@ -80,6 +112,8 @@
     let title = ''
     let subtitle = ''
     let byline = ''
+    let h2Index = 0
+    let nextParagraphIsSummary = false
 
     for (let index = 0; index < lines.length; index += 1) {
       const line = lines[index]
@@ -105,7 +139,7 @@
         continue
       }
 
-      if (!byline && trimmed.startsWith('**By ')) {
+      if (!byline && /^\*\*(By|Oleh|Por)\s+Abraham(?:\s+Godong)?\*\*/.test(trimmed)) {
         byline = trimmed.replace(/\*\*/g, '')
         continue
       }
@@ -123,7 +157,8 @@
 
       if (trimmed.startsWith('## ')) {
         const text = trimmed.replace(/^##\s+/, '')
-        const id = slugify(text)
+        const id = stableHeadingIds[h2Index] || slugify(text)
+        h2Index += 1
         toc.push({ id, text })
         body.push(`<h2 id="${id}">${formatInline(text)}</h2>`)
         continue
@@ -132,7 +167,9 @@
       if (trimmed.startsWith('### ')) {
         const text = trimmed.replace(/^###\s+/, '')
         const id = slugify(text)
-        body.push(`<h3 id="${id}">${formatInline(text)}</h3>`)
+        const summaryHeading = isSummaryHeading(text)
+        nextParagraphIsSummary = summaryHeading
+        body.push(`<h3 id="${id}"${summaryHeading ? ' class="scuba-guide-summary-label"' : ''}>${formatInline(text)}</h3>`)
         continue
       }
 
@@ -182,7 +219,13 @@
         index += 1
         paragraph.push(lines[index].trim())
       }
-      body.push(`<p>${formatInline(paragraph.join(' '))}</p>`)
+      const paragraphText = paragraph.join(' ')
+      const classes = []
+      if (isGuideNote(paragraphText)) classes.push('scuba-guide-note')
+      if (nextParagraphIsSummary) classes.push('scuba-guide-summary')
+      nextParagraphIsSummary = false
+      const className = classes.length ? ` class="${classes.join(' ')}"` : ''
+      body.push(`<p${className}>${formatInline(paragraphText)}</p>`)
     }
 
     return {
@@ -195,8 +238,8 @@
     }
   }
 
-  const guide = parseGuide(guideMarkdown)
-  const partLinks = guide.toc.filter((item) => item.text.startsWith('Part '))
+  $: guide = parseGuide(guideMarkdownByLanguage[currentLanguage] || guideMarkdownEn)
+  $: partLinks = guide.toc.filter((item) => item.id.startsWith('part-'))
   let guideBodyElement
   let contentsVisible = false
 
@@ -247,7 +290,7 @@
         </p>
       </div>
       <p class="text-sm font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-        Written by Abraham Godong
+        {t.scuba.byline}
       </p>
     </div>
 
@@ -260,7 +303,7 @@
         height="1350"
       />
       <figcaption class="px-5 py-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-        A shareable field guide for divers making the leap into cold Pacific Northwest water.
+        {t.scuba.heroCaption}
       </figcaption>
     </figure>
   </header>
@@ -271,18 +314,18 @@
   >
     <div>
       <h2 id="scuba-guide-navigation" class="text-sm font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-        Jump to a part
+        {t.scuba.jumpToPart}
       </h2>
     </div>
 
-    <nav class="flex flex-wrap gap-x-5 gap-y-3 md:justify-end" aria-label="Pacific Northwest diving guide parts">
+    <nav class="flex flex-wrap gap-x-5 gap-y-3 md:justify-end" aria-label={t.scuba.partNavigation}>
       {#each partLinks as item}
         <a
           class="slide-link pb-1 text-sm font-semibold uppercase leading-relaxed tracking-widest"
           href={`#${item.id}`}
           aria-label={item.text}
         >
-          <span>{item.text.match(/^Part \d+/)?.[0] || item.text}</span>
+          <span>{getPartLabel(item)}</span>
         </a>
       {/each}
     </nav>
@@ -297,10 +340,10 @@
     >
       <nav
         class="max-h-[calc(100svh-7rem)] overflow-auto border-l border-[var(--color-border)] pl-5 pr-2"
-        aria-label="Scuba guide table of contents"
+        aria-label={t.scuba.tableOfContents}
       >
         <p class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-          Contents
+          {t.scuba.contents}
         </p>
         <ol class="mt-5 grid gap-3">
           {#each guide.toc as item}
@@ -319,7 +362,7 @@
 
       {#if guide.footnotes.length}
         <section class="scuba-guide-notes" aria-labelledby="scuba-guide-notes">
-          <h2 id="scuba-guide-notes">Sources and Notes</h2>
+          <h2 id="scuba-guide-notes">{t.scuba.sourcesAndNotes}</h2>
           <ol>
             {#each guide.footnotes as note}
               <li id={`note-${note.id}`}>{@html note.text}</li>
@@ -395,6 +438,30 @@
 
   .scuba-guide :global(p) {
     margin-top: 1.25rem;
+  }
+
+  .scuba-guide :global(.scuba-guide-note) {
+    border: 1px solid rgb(13 124 134 / 0.24);
+    border-left: 0.28rem solid var(--color-accent);
+    background: rgb(237 244 241 / 0.86);
+    padding: 1rem 1.15rem;
+    color: var(--color-text-primary);
+  }
+
+  .scuba-guide :global(.scuba-guide-note em) {
+    font-style: italic;
+  }
+
+  .scuba-guide :global(.scuba-guide-summary-label) {
+    margin-top: 1.6rem;
+    color: var(--color-accent-hover);
+  }
+
+  .scuba-guide :global(.scuba-guide-summary) {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding: 1.05rem 1.2rem;
+    color: rgb(49 67 63);
   }
 
   .scuba-guide :global(ul),
