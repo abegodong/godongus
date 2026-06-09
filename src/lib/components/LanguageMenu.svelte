@@ -7,13 +7,15 @@
   export let activeLanguage
   export let languageMenuOpen
   export let controlsHidden
+  export let signatureVisible = true
   export let onToggle
   export let onChangeLanguage
 </script>
 
 <div
   class={[
-    'language-control site-control fixed right-[calc(var(--signature-size)+2rem)] top-5 z-30',
+    'language-control site-control fixed top-5 z-30',
+    signatureVisible ? 'right-[calc(var(--signature-size)+2rem)]' : 'right-6',
     controlsHidden ? 'site-control-hidden' : '',
   ]}
 >

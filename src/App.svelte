@@ -496,6 +496,7 @@
   $: errorTitle = errorStatus === '500' ? t.error.title500 : t.error.title404
   $: currentQuote = errorQuotes[visibleQuoteIndex]
   $: activeSeo = isErrorRoute && !routeSeo[pathname] ? routeSeo['/404'] : routeSeo[pathname] || defaultSeo
+  $: signatureVisible = pathname !== '/salish-sea-diving'
 
   $: if (robotsMeta && activeSeo) {
     applySeo()
@@ -989,11 +990,12 @@
     {activeLanguage}
     {languageMenuOpen}
     {controlsHidden}
+    {signatureVisible}
     onToggle={() => (languageMenuOpen = !languageMenuOpen)}
     onChangeLanguage={changeLanguage}
   />
 
-  {#if pathname !== '/salish-sea-diving'}
+  {#if signatureVisible}
     <div
       class="pointer-events-none fixed right-0 top-1/2 z-[1] -translate-y-1/2 whitespace-nowrap text-[length:var(--signature-size)] font-semibold uppercase leading-none signature-mark [writing-mode:vertical-rl]"
       aria-hidden="true"
