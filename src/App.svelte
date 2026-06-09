@@ -24,7 +24,7 @@
         items: [
           { href: '/', label: 'Return home' },
           { href: '/insights', label: 'Writing' },
-          { href: '/scuba-life', label: 'Scuba life' },
+          { href: '/scuba-life', label: 'PNW diving guide' },
           { href: '/hello', label: 'Write to me' },
         ],
       },
@@ -35,7 +35,7 @@
         ],
         links: {
           insights: 'Read my writing',
-          scuba: 'See my scuba life',
+          scuba: 'Read my diving guide',
           contact: 'Write to me',
         },
       },
@@ -66,10 +66,10 @@
         featured: 'Featured writing',
       },
       scuba: {
-        eyebrow: 'Scuba life',
-        title: 'Below the surface.',
+        eyebrow: 'PNW diving guide',
+        title: 'Diving the Pacific Northwest.',
         intro:
-          'A place for notes, photos, and videos from my life as a scuba diver.',
+          'A field guide for divers making the leap into cold Pacific Northwest water, written and photographed from my own experience in the Salish Sea.',
         source: 'Dive journal',
         feedTitle: 'Photos, videos, and field notes',
         feedBody:
@@ -123,9 +123,9 @@
             robots: 'index, follow',
           },
           '/scuba-life': {
-            title: 'Scuba Life | Abraham Godong',
+            title: 'Diving the Pacific Northwest | Abraham Godong',
             description:
-              'Scuba diving notes, photos, and underwater moments from Abraham Godong.',
+              'A Pacific Northwest diving field guide by Abraham Godong, with practical notes on cold-water training, gear, tides, local sites, and Puget Sound marine life.',
             robots: 'index, follow',
           },
           '/style-guide': {
@@ -160,7 +160,7 @@
         items: [
           { href: '/', label: 'Kembali ke beranda' },
           { href: '/insights', label: 'Tulisan' },
-          { href: '/scuba-life', label: 'Kehidupan scuba' },
+          { href: '/scuba-life', label: 'Panduan diving PNW' },
           { href: '/hello', label: 'Tulis pesan' },
         ],
       },
@@ -171,7 +171,7 @@
         ],
         links: {
           insights: 'Baca tulisan saya',
-          scuba: 'Lihat kehidupan scuba saya',
+          scuba: 'Baca panduan diving saya',
           contact: 'Tulis pesan',
         },
       },
@@ -201,10 +201,10 @@
         featured: 'Tulisan pilihan',
       },
       scuba: {
-        eyebrow: 'Kehidupan scuba',
-        title: 'Di bawah permukaan.',
+        eyebrow: 'Panduan diving PNW',
+        title: 'Menyelam di Pacific Northwest.',
         intro:
-          'Tempat untuk catatan, foto, dan video dari kehidupan saya sebagai penyelam scuba.',
+          'Panduan lapangan untuk penyelam yang mulai masuk ke air dingin Pacific Northwest, ditulis dan difoto dari pengalaman saya sendiri di Salish Sea.',
         source: 'Jurnal penyelaman',
         feedTitle: 'Foto, video, dan catatan lapangan',
         feedBody:
@@ -258,9 +258,9 @@
             robots: 'index, follow',
           },
           '/scuba-life': {
-            title: 'Kehidupan Scuba | Abraham Godong',
+            title: 'Menyelam di Pacific Northwest | Abraham Godong',
             description:
-              'Catatan penyelaman, foto, dan momen bawah air dari Abraham Godong.',
+              'Panduan diving Pacific Northwest oleh Abraham Godong, dengan catatan praktis tentang latihan air dingin, perlengkapan, pasang surut, lokasi lokal, dan kehidupan laut Puget Sound.',
             robots: 'index, follow',
           },
           '/style-guide': {
@@ -295,7 +295,7 @@
         items: [
           { href: '/', label: 'Volver al inicio' },
           { href: '/insights', label: 'Escritos' },
-          { href: '/scuba-life', label: 'Vida de scuba' },
+          { href: '/scuba-life', label: 'Guía de buceo PNW' },
           { href: '/hello', label: 'Escríbeme' },
         ],
       },
@@ -306,7 +306,7 @@
         ],
         links: {
           insights: 'Lee mis escritos',
-          scuba: 'Ve mi vida de scuba',
+          scuba: 'Lee mi guía de buceo',
           contact: 'Escríbeme',
         },
       },
@@ -336,10 +336,10 @@
         featured: 'Texto destacado',
       },
       scuba: {
-        eyebrow: 'Vida de scuba',
-        title: 'Bajo la superficie.',
+        eyebrow: 'Guía de buceo PNW',
+        title: 'Bucear el Pacific Northwest.',
         intro:
-          'Un lugar para notas, fotos y videos de mi vida como buzo scuba.',
+          'Una guía de campo para buzos que dan el salto al agua fría del Pacific Northwest, escrita y fotografiada desde mi propia experiencia en el Salish Sea.',
         source: 'Diario de inmersiones',
         feedTitle: 'Fotos, videos y notas de campo',
         feedBody:
@@ -393,9 +393,9 @@
             robots: 'index, follow',
           },
           '/scuba-life': {
-            title: 'Vida de Scuba | Abraham Godong',
+            title: 'Bucear el Pacific Northwest | Abraham Godong',
             description:
-              'Notas de buceo, fotos y momentos bajo el agua de Abraham Godong.',
+              'Una guía de buceo del Pacific Northwest por Abraham Godong, con notas prácticas sobre entrenamiento en agua fría, equipo, mareas, sitios locales y vida marina de Puget Sound.',
             robots: 'index, follow',
           },
           '/style-guide': {
@@ -938,7 +938,8 @@
 
 <main
   class={[
-    'relative flex min-h-svh items-center justify-center overflow-hidden bg-[var(--color-background)] pl-6 pr-[calc(var(--signature-size)+2rem)] text-[var(--color-text-primary)]',
+    'relative flex min-h-svh items-center justify-center overflow-hidden bg-[var(--color-background)] pl-6 text-[var(--color-text-primary)]',
+    pathname === '/scuba-life' ? 'pr-6' : 'pr-[calc(var(--signature-size)+2rem)]',
     pathname === '/' ? 'home-background' : '',
   ]}
   style="--signature-size: clamp(2.5rem, 10svh, 7rem)"
@@ -971,11 +972,13 @@
     onChangeLanguage={changeLanguage}
   />
 
-  <div
-    class="pointer-events-none fixed right-0 top-1/2 z-[1] -translate-y-1/2 whitespace-nowrap text-[length:var(--signature-size)] font-semibold uppercase leading-none signature-mark [writing-mode:vertical-rl]"
-    aria-hidden="true"
-    data-signature="ABRAHAM GODONG"
-  ></div>
+  {#if pathname !== '/scuba-life'}
+    <div
+      class="pointer-events-none fixed right-0 top-1/2 z-[1] -translate-y-1/2 whitespace-nowrap text-[length:var(--signature-size)] font-semibold uppercase leading-none signature-mark [writing-mode:vertical-rl]"
+      aria-hidden="true"
+      data-signature="ABRAHAM GODONG"
+    ></div>
+  {/if}
 
   <SiteMenu
     {t}
