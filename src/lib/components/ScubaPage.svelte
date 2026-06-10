@@ -1,18 +1,19 @@
 <script>
   import { onMount, tick } from 'svelte'
-  import guideMarkdownEn from '../data/pnw-diving-field-guide.md?raw'
-  import guideMarkdownEs from '../data/pnw-diving-field-guide.es.md?raw'
-  import guideMarkdownId from '../data/pnw-diving-field-guide.id.md?raw'
+  import guideMarkdown from '../data/pnw-diving-field-guide.md?raw'
 
   export let t
-  export let currentLanguage = 'en'
 
   const imageBase = '/images/scuba/'
   const slugCounts = new Map()
-  const guideMarkdownByLanguage = {
-    en: guideMarkdownEn,
-    es: guideMarkdownEs,
-    id: guideMarkdownId,
+  const guideUi = {
+    byline: 'Written by Abraham Godong',
+    heroCaption: 'A shareable field guide for divers making the leap into cold Pacific Northwest water.',
+    jumpToPart: 'Jump to a part',
+    partNavigation: 'Salish Sea diving guide parts',
+    tableOfContents: 'Salish Sea diving guide table of contents',
+    contents: 'Contents',
+    sourcesAndNotes: 'Sources and Notes',
   }
   const stableHeadingIds = [
     'preface',
@@ -90,17 +91,17 @@
   }
 
   const getPartLabel = (item) => {
-    const textMatch = item.text.match(/^(Part|Bagian|Parte)\s+(\d+)/i)
-    if (textMatch) return `${textMatch[1]} ${textMatch[2]}`
+    const textMatch = item.text.match(/^Part\s+(\d+)/i)
+    if (textMatch) return `Part ${textMatch[1]}`
 
     const idMatch = item.id.match(/^part-(\d+)/)
     return idMatch ? `Part ${idMatch[1]}` : item.text
   }
 
   const isGuideNote = (value = '') =>
-    /^\*(One note before we begin|Satu catatan sebelum kita mulai|Una nota antes de comenzar):/i.test(value)
+    /^\*One note before we begin:/i.test(value)
 
-  const isSummaryHeading = (value = '') => /^(Summary|Ringkasan|Resumen)$/i.test(value)
+  const isSummaryHeading = (value = '') => /^Summary$/i.test(value)
 
   const parseGuide = (markdown) => {
     slugCounts.clear()
@@ -139,7 +140,7 @@
         continue
       }
 
-      if (!byline && /^\*\*(By|Oleh|Por)\s+Abraham(?:\s+Godong)?\*\*/.test(trimmed)) {
+      if (!byline && /^\*\*By\s+Abraham(?:\s+Godong)?\*\*/.test(trimmed)) {
         byline = trimmed.replace(/\*\*/g, '')
         continue
       }
@@ -238,7 +239,7 @@
     }
   }
 
-  $: guide = parseGuide(guideMarkdownByLanguage[currentLanguage] || guideMarkdownEn)
+  const guide = parseGuide(guideMarkdown)
   $: partLinks = guide.toc.filter((item) => item.id.startsWith('part-'))
   let guideBodyElement
   let contentsVisible = false
@@ -290,7 +291,7 @@
         </p>
       </div>
       <p class="text-sm font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-        {t.scuba.byline}
+        {guideUi.byline}
       </p>
     </div>
 
@@ -303,7 +304,7 @@
         height="1350"
       />
       <figcaption class="px-5 py-4 text-sm leading-relaxed text-[var(--color-text-secondary)]">
-        {t.scuba.heroCaption}
+        {guideUi.heroCaption}
       </figcaption>
     </figure>
   </header>
@@ -314,11 +315,11 @@
   >
     <div>
       <h2 id="scuba-guide-navigation" class="text-sm font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-        {t.scuba.jumpToPart}
+        {guideUi.jumpToPart}
       </h2>
     </div>
 
-    <nav class="flex flex-wrap gap-x-5 gap-y-3 md:justify-end" aria-label={t.scuba.partNavigation}>
+    <nav class="flex flex-wrap gap-x-5 gap-y-3 md:justify-end" aria-label={guideUi.partNavigation}>
       {#each partLinks as item}
         <a
           class="slide-link pb-1 text-sm font-semibold uppercase leading-relaxed tracking-widest"
@@ -340,10 +341,10 @@
     >
       <nav
         class="max-h-[calc(100svh-7rem)] overflow-auto border-l border-[var(--color-border)] pl-5 pr-2"
-        aria-label={t.scuba.tableOfContents}
+        aria-label={guideUi.tableOfContents}
       >
         <p class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-          {t.scuba.contents}
+          {guideUi.contents}
         </p>
         <ol class="mt-5 grid gap-3">
           {#each guide.toc as item}
@@ -362,7 +363,7 @@
 
       {#if guide.footnotes.length}
         <section class="scuba-guide-notes" aria-labelledby="scuba-guide-notes">
-          <h2 id="scuba-guide-notes">{t.scuba.sourcesAndNotes}</h2>
+          <h2 id="scuba-guide-notes">{guideUi.sourcesAndNotes}</h2>
           <ol>
             {#each guide.footnotes as note}
               <li id={`note-${note.id}`}>{@html note.text}</li>
