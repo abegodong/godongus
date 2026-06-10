@@ -22,7 +22,7 @@
     'part-3-demystifying-the-gear-configurations-and-which-are-actually-yours-to-make',
     'part-4-where-to-plug-in-shops-clubs-and-community',
     'part-5-reading-the-water-tides-slack-and-conditions',
-    'part-6-the-cast-critters-of-puget-sound',
+    'part-6-who-youll-meet-underwater',
     'part-7-where-to-dive-a-difficulty-progression',
     'part-8-the-certification-ladder-where-to-go-next',
   ]
@@ -46,10 +46,10 @@
     return count ? `${base}-${count + 1}` : base
   }
 
-  const formatInline = (value = '') => {
+  const formatInline = (value = '', footnoteNumbers = new Map()) => {
     let formatted = escapeHtml(value)
       .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>')
-      .replace(/\[\^([^\]]+)\]/g, '<sup><a href="#note-$1">$1</a></sup>')
+      .replace(/\[\^([^\]]+)\]/g, (_match, id) => `<sup><a href="#note-${id}">${footnoteNumbers.get(id) || id}</a></sup>`)
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em>$1</em>')
 
@@ -107,6 +107,13 @@
     slugCounts.clear()
 
     const lines = markdown.replace(/\r\n/g, '\n').split('\n')
+    const footnoteNumbers = new Map()
+    lines.forEach((line) => {
+      const match = line.trim().match(/^\[\^([^\]]+)\]:\s*(.+)$/)
+      if (match && !footnoteNumbers.has(match[1])) {
+        footnoteNumbers.set(match[1], footnoteNumbers.size + 1)
+      }
+    })
     const footnotes = []
     const body = []
     const toc = []
@@ -125,7 +132,7 @@
       if (trimmed.startsWith('[^')) {
         const match = trimmed.match(/^\[\^([^\]]+)\]:\s*(.+)$/)
         if (match) {
-          footnotes.push({ id: match[1], text: formatInline(match[2]) })
+          footnotes.push({ id: match[1], text: formatInline(match[2], footnoteNumbers) })
         }
         continue
       }
@@ -161,7 +168,7 @@
         const id = stableHeadingIds[h2Index] || slugify(text)
         h2Index += 1
         toc.push({ id, text })
-        body.push(`<h2 id="${id}">${formatInline(text)}</h2>`)
+        body.push(`<h2 id="${id}">${formatInline(text, footnoteNumbers)}</h2>`)
         continue
       }
 
@@ -170,14 +177,14 @@
         const id = slugify(text)
         const summaryHeading = isSummaryHeading(text)
         nextParagraphIsSummary = summaryHeading
-        body.push(`<h3 id="${id}"${summaryHeading ? ' class="scuba-guide-summary-label"' : ''}>${formatInline(text)}</h3>`)
+        body.push(`<h3 id="${id}"${summaryHeading ? ' class="scuba-guide-summary-label"' : ''}>${formatInline(text, footnoteNumbers)}</h3>`)
         continue
       }
 
       if (trimmed.startsWith('#### ')) {
         const text = trimmed.replace(/^####\s+/, '')
         const id = slugify(text)
-        body.push(`<h4 id="${id}">${formatInline(text)}</h4>`)
+        body.push(`<h4 id="${id}">${formatInline(text, footnoteNumbers)}</h4>`)
         continue
       }
 
@@ -226,7 +233,7 @@
       if (nextParagraphIsSummary) classes.push('scuba-guide-summary')
       nextParagraphIsSummary = false
       const className = classes.length ? ` class="${classes.join(' ')}"` : ''
-      body.push(`<p${className}>${formatInline(paragraphText)}</p>`)
+      body.push(`<p${className}>${formatInline(paragraphText, footnoteNumbers)}</p>`)
     }
 
     return {
@@ -581,6 +588,26 @@
     max-width: 66ch;
     border-top: 1px solid var(--color-border);
     padding-top: 2.5rem;
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .scuba-guide-notes :global(h2) {
+    background: transparent;
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
+  }
+
+  .scuba-guide-notes :global(ol) {
+    display: grid;
+    gap: 0.85rem;
+    padding-left: 1.35rem;
+  }
+
+  .scuba-guide-notes :global(li) {
+    padding-left: 0.25rem;
   }
 
   @media (max-width: 900px) {
