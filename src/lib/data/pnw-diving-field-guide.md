@@ -125,7 +125,7 @@ The destination is the same for all three — safe, confident cold-water diving 
 
 If you have never been certified, your first real decision is *where* to earn your Open Water certification: in warm water on a trip, or right here in the cold.
 
-I will be honest about my own bias: I am glad I certified in the tropics first. Learning the fundamentals — clearing a mask, recovering a regulator, managing buoyancy, simply trusting that you can breathe underwater — is far easier in warm, clear, forgiving water than in 48-degree green water under a drysuit. Bali let me concentrate on the skills without also fighting the cold, and I think it made me a calmer, better student.
+I will be honest about my own bias: I am glad I certified in the tropics first. Learning the fundamentals — clearing a mask, recovering a regulator, managing buoyancy, simply trusting that you can breathe underwater — is far easier in warm, clear, forgiving water than in 48-degree green water under a drysuit. My training in tropical Bali, Indonesia, allowed me to concentrate on the skills without also fighting the cold, and I think it made me a calmer, better student.
 
 But credit where it is due: I have enormous respect for the divers who skip the gentle option and earn their certifications right here. Along the way I have met many newly minted local divers who completed their Open Water, Advanced Open Water, and Rescue courses entirely in Puget Sound — cold, drysuited, low-visibility, and slack-timed from the very beginning. That is the harder road, and the divers who take it come out genuinely prepared for home waters. Local shops make that path realistic: many build drysuit training right into their cold-water Open Water courses, so you learn in the suit you will actually dive.
 
@@ -135,7 +135,7 @@ So neither route is wrong. Certifying warm is the gentler way to learn the funda
 
 This is my path — and the one I got wrong at first.
 
-Your Open Water card from a tropical destination is a recognized credential anywhere in the world; coming from Bali, you do not re-certify to dive the Salish Sea. But it is worth being precise about what that card represents: it certifies that you were trained to dive in the conditions and configuration you learned in — warm, calm, lightly weighted, in a thin wetsuit. It did not teach you cold-water exposure protection, drysuit handling, the heavier weighting cold diving requires, working with thick gloves, or planning a dive around the tide. **The card transfers; the competence for a new environment does not.** Recognizing that distinction is not a technicality — it is the single habit that keeps cold-water divers alive.
+Your Open Water card from a tropical destination is a recognized credential anywhere in the world; coming from the warm tropics, you do not re-certify to dive the Salish Sea. But it is worth being precise about what that card represents: it certifies that you were trained to dive in the conditions and configuration you learned in — warm, calm, lightly weighted, in a thin wetsuit. It did not teach you cold-water exposure protection, drysuit handling, the heavier weighting cold diving requires, working with thick gloves, or planning a dive around the tide. **The card transfers; the competence for a new environment does not.** Recognizing that distinction is not a technicality — it is the single habit that keeps cold-water divers alive.
 
 <figure class="wrap-right">
 <img src="img/infamous_7mm_wetsuit.jpg" alt="A 7mm wetsuit hanging unused">
