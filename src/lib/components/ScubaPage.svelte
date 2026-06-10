@@ -18,13 +18,13 @@
   const stableHeadingIds = [
     'preface',
     'part-1-why-the-salish-sea',
-    'part-2-getting-started-three-ways-in',
-    'part-3-demystifying-the-gear-configurations-and-which-are-actually-yours-to-make',
-    'part-4-where-to-plug-in-shops-clubs-and-community',
-    'part-5-reading-the-water-tides-slack-and-conditions',
-    'part-6-who-youll-meet-underwater',
-    'part-7-where-to-dive-a-difficulty-progression',
-    'part-8-the-certification-ladder-where-to-go-next',
+    'part-2-getting-started',
+    'part-3-gear-that-matters',
+    'part-4-find-your-community',
+    'part-5-reading-the-water',
+    'part-6-underwater-life',
+    'part-7-where-to-dive',
+    'part-8-what-comes-next',
   ]
 
   const escapeHtml = (value = '') =>
@@ -97,6 +97,9 @@
     const idMatch = item.id.match(/^part-(\d+)/)
     return idMatch ? `Part ${idMatch[1]}` : item.text
   }
+
+  const getPartTitle = (item) =>
+    item.text.replace(/^Part\s+\d+\s+—\s+/, '')
 
   const isGuideNote = (value = '') =>
     /^\*One note before we begin:/i.test(value)
@@ -247,6 +250,7 @@
   }
 
   const guide = parseGuide(guideMarkdown)
+  $: prefaceLink = guide.toc.find((item) => item.id === 'preface')
   $: partLinks = guide.toc.filter((item) => item.id.startsWith('part-'))
   let guideBodyElement
   let contentsVisible = false
@@ -316,26 +320,46 @@
     </figure>
   </header>
 
-  <section
-    class="grid gap-5 border-y border-[var(--color-border)] py-7 md:grid-cols-[auto_1fr] md:items-center"
-    aria-labelledby="scuba-guide-navigation"
-  >
-    <div>
-      <h2 id="scuba-guide-navigation" class="text-sm font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-        {guideUi.jumpToPart}
-      </h2>
+  <section class="grid gap-5 border-y border-[var(--color-border)] py-7" aria-labelledby="scuba-guide-navigation">
+    <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
+      <div class="grid gap-2">
+        <h2 id="scuba-guide-navigation" class="text-sm font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
+          {guideUi.jumpToPart}
+        </h2>
+        <p class="max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)]">
+          Use this part list to move through the guide without having to scroll the whole article.
+        </p>
+      </div>
+
+      {#if prefaceLink}
+        <a
+          class="slide-link w-fit pb-1 text-sm font-semibold uppercase leading-relaxed tracking-widest text-[var(--color-text-secondary)] sm:justify-self-end"
+          href={`#${prefaceLink.id}`}
+        >
+          <span>{prefaceLink.text}</span>
+        </a>
+      {/if}
     </div>
 
-    <nav class="flex flex-wrap gap-x-5 gap-y-3 md:justify-end" aria-label={guideUi.partNavigation}>
-      {#each partLinks as item}
-        <a
-          class="slide-link pb-1 text-sm font-semibold uppercase leading-relaxed tracking-widest"
-          href={`#${item.id}`}
-          aria-label={item.text}
-        >
-          <span>{getPartLabel(item)}</span>
-        </a>
-      {/each}
+    <nav aria-label={guideUi.partNavigation}>
+      <ol class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {#each partLinks as item}
+          <li>
+            <a
+              class="group grid h-full gap-2 border border-[var(--color-border)] bg-[rgb(237_244_241_/_0.42)] p-4 transition duration-200 hover:border-[var(--color-accent)] hover:bg-[rgb(237_244_241_/_0.78)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+              href={`#${item.id}`}
+              aria-label={item.text}
+            >
+              <span class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
+                {getPartLabel(item)}
+              </span>
+              <span class="text-base font-semibold leading-snug text-[var(--color-text-primary)]">
+                {getPartTitle(item)}
+              </span>
+            </a>
+          </li>
+        {/each}
+      </ol>
     </nav>
   </section>
 

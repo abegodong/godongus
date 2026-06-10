@@ -28,13 +28,13 @@ This guide is written from exactly that path. My own diving started warm — ope
 The series is built as eight standalone parts that also read as a single guide:
 
 1. **Why the Salish Sea** — the case for cold water.
-2. **Getting Started** — three ways in: getting certified, moving from warm water to cold, and coming back after years away.
-3. **Demystifying the Gear** — configurations, and which are actually yours to make.
-4. **Where to Plug In** — shops, clubs, and the community that gets you diving.
+2. **Getting Started** — three ways into local diving.
+3. **Gear That Matters** — what to own, rent, and ignore at first.
+4. **Find Your Community** — shops, clubs, and supported ways in.
 5. **Reading the Water** — tides, slack, and conditions.
-6. **Who You'll Meet Underwater** — the critters you came for, and a glimpse of what you'll see.
-7. **Where to Dive** — a difficulty progression of local sites.
-8. **The Certification Ladder** — where to go next: the progression from Open Water onward.
+6. **Underwater Life** — the animals and encounters that make the cold worth it.
+7. **Where to Dive** — local sites by difficulty.
+8. **What Comes Next** — the training path beyond the basics.
 
 **A quick note on three names.** I use three geographic terms in this guide, and they are not interchangeable. The **Pacific Northwest** is the broad land region (Washington, Oregon, and often British Columbia), and it is the familiar name on the cover. The **Salish Sea** is the water itself: the single inland marine ecosystem that runs from the south end of Puget Sound up through the San Juan Islands and the Strait of Juan de Fuca to the Strait of Georgia in British Columbia. The name was proposed by marine biologist Bert Webber and officially adopted by the United States in 2009 and Canada in 2010, as an umbrella that unites those waters and honors the Coast Salish peoples who have lived along them for millennia.[^salish] **Puget Sound** is the southern, Washington arm of the Salish Sea, running from Admiralty Inlet down to Olympia, and it is where I live, in Seattle, and where most of the diving in these pages takes place. So throughout, I use *Salish Sea* for these waters in general, and *Puget Sound* when I mean specifically my home stretch of them.
 
@@ -85,7 +85,7 @@ The Salish Sea is not warm-water diving with thicker neoprene. It is its own env
 
 ---
 
-## Part 2 — Getting Started: Three Ways In
+## Part 2 — Getting Started
 
 ### Summary
 
@@ -174,7 +174,7 @@ Start from where you actually are: new, warm-water certified, or returning after
 
 ---
 
-## Part 3 — Demystifying the Gear: Configurations, and Which Are Actually Yours to Make
+## Part 3 — Gear That Matters
 
 ### Summary
 
@@ -321,7 +321,7 @@ Buy personal-fit gear first, rent the expensive life-support pieces until your d
 
 ---
 
-## Part 4 — Where to Plug In: Shops, Clubs, and Community
+## Part 4 — Find Your Community
 
 ### Summary
 
@@ -388,7 +388,7 @@ The community is part of the safety system. Start where someone experienced is w
 
 ---
 
-## Part 5 — Reading the Water: Tides, Slack, and Conditions
+## Part 5 — Reading the Water
 
 ### Summary
 
@@ -418,7 +418,7 @@ Plan the current before you plan the scenery. Tide height is not the same thing 
 
 ---
 
-## Part 6 — Who You'll Meet Underwater
+## Part 6 — Underwater Life
 
 ### Summary
 
@@ -481,7 +481,7 @@ Look closer and the reef becomes a jewelry box. **Nudibranchs** — shell-less s
 
 Some of the best encounters you cannot plan for — and several of them are warm-blooded. **Harbor seals** are the common surprise: bold and playful, they will often appear behind you, tug a fin or hang in the water studying your bubbles, then vanish before you have finished turning around. Less often, and far more heart-stopping, a **sea lion** buzzes the dive: California and Steller sea lions are big, fast, and astonishingly agile, and having one rocket past your mask, twist around, and come back for another look is the kind of thing that has divers surfacing mid-laugh. Either one turns an ordinary dive into a story you tell for weeks.
 
-The legend of these waters, though, is the **bluntnose sixgill shark** — and I will admit up front that I have yet to see one. It is a true deep-sea animal, a living fossil with six gill slits instead of the usual five and none of the tall dorsal fin you picture on a shark, normally cruising thousands of feet down. But Puget Sound appears to be a nursery for them, and through the summer months, roughly June into September, the smaller ones rise into recreational depth along the steep slope at **Redondo Beach** in Des Moines, where the bottom drops from about 25 to 100 feet in a way that mimics their deep-water home. Sightings there have become reliable enough that the city of Des Moines has declared itself the **"Sixgill Shark Capital of the World,"** named July 6 *Sixgill Shark Day*, and state lawmakers are now pushing to make the bluntnose sixgill Washington's official state shark. For all their size (adults can reach perhaps eighteen feet, though the Sound's juveniles run nearer six), they are generally described as elusive deep-water animals rather than a routine threat to divers, and people who have swum with them talk about it as one of the great encounters in cold-water diving.[^sixgill] One of these summers, I intend to be one of them.
+The legend of these waters, though, is the **bluntnose sixgill shark** — and I will admit up front that I have yet to see one. It is a true deep-sea animal, a living fossil with six gill slits instead of the usual five and none of the tall dorsal fin you picture on a shark, normally cruising thousands of feet down. But Puget Sound appears to be a nursery for them, and through the summer months, roughly June into September, the smaller ones sometimes rise into recreational depth. They are not exclusive to one site; deep slopes and channels around the Sound can produce stories and sightings. **Redondo Beach** in Des Moines is simply the best-known local example for recreational divers, because the bottom drops from about 25 to 100 feet in a way that mimics their deep-water home. Sightings there have become reliable enough that the city of Des Moines has declared itself the **"Sixgill Shark Capital of the World,"** named July 6 *Sixgill Shark Day*, and state lawmakers are now pushing to make the bluntnose sixgill Washington's official state shark. For all their size (adults can reach perhaps eighteen feet, though the Sound's juveniles run nearer six), they are generally described as elusive deep-water animals rather than a routine threat to divers, and people who have swum with them talk about it as one of the great encounters in cold-water diving.[^sixgill] One of these summers, I intend to be one of them.
 
 None of it is guaranteed, which is exactly what keeps you coming back. This is the reward the cold protects — and the reason the planning, the training, and the heavy gear in the rest of this guide are worth it. The next part is about where to go to find them.
 
@@ -491,7 +491,7 @@ The Salish Sea rewards attention. Big encounters are wonderful, but much of the 
 
 ---
 
-## Part 7 — Where to Dive: A Difficulty Progression
+## Part 7 — Where to Dive
 
 ### Summary
 
@@ -542,7 +542,7 @@ Choose sites by current sensitivity first, not by fame. Tier 1 is where you buil
 
 ---
 
-## Part 8 — The Certification Ladder: Where to Go Next
+## Part 8 — What Comes Next
 
 ### Summary
 
