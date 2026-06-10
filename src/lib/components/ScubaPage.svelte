@@ -370,12 +370,12 @@
   </header>
 
   <section
-    class="sticky top-20 z-30 w-full max-w-[66ch] self-center border border-[var(--color-border)] bg-[rgb(250_248_241_/_0.82)] px-3 py-3 shadow-sm backdrop-blur-md md:top-16 lg:top-4"
+    class="sticky top-4 z-30 w-full max-w-[66ch] self-center border border-[var(--color-border)] bg-[rgb(250_248_241_/_0.82)] px-3 py-3 shadow-sm backdrop-blur-md"
     aria-label="Guide navigation"
   >
-    <div class="grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+    <div class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 sm:grid-cols-[auto_1fr_auto] sm:items-center">
       <button
-        class="border border-[var(--color-border)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-primary)] transition hover:border-[var(--color-accent)] hover:bg-[rgb(237_244_241_/_0.76)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        class="order-1 border border-[var(--color-border)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-primary)] transition hover:border-[var(--color-accent)] hover:bg-[rgb(237_244_241_/_0.76)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
         type="button"
         aria-expanded={guideNavOpen}
         aria-controls="scuba-guide-parts-panel"
@@ -384,7 +384,7 @@
         Guide
       </button>
 
-      <div class="min-w-0">
+      <div class="order-2 min-w-0">
         <p class="text-[0.68rem] font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
           Current section
         </p>
@@ -393,32 +393,32 @@
         </p>
       </div>
 
-      <div class="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+      <div class="order-3 col-span-2 flex items-center justify-between gap-4 sm:col-span-1 sm:justify-end">
         {#if previousGuideItem}
           <a
-            class="border border-[var(--color-border)] px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            class="slide-link pb-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] transition hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             href={`#${previousGuideItem.id}`}
             onclick={(event) => navigateToSectionWithFade(event, previousGuideItem.id)}
           >
-            Previous
+            ← Previous
           </a>
         {:else}
-          <span class="border border-transparent px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] opacity-40">
-            Previous
+          <span class="pb-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] opacity-40">
+            ← Previous
           </span>
         {/if}
 
         {#if nextGuideItem}
           <a
-            class="border border-[var(--color-border)] px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            class="slide-link pb-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] transition hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             href={`#${nextGuideItem.id}`}
             onclick={(event) => navigateToSectionWithFade(event, nextGuideItem.id)}
           >
-            Next
+            Next →
           </a>
         {:else}
-          <span class="border border-transparent px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] opacity-40">
-            Next
+          <span class="pb-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] opacity-40">
+            Next →
           </span>
         {/if}
       </div>
@@ -524,6 +524,10 @@
   .scuba-guide :global(h3),
   .scuba-guide :global(h4) {
     scroll-margin-top: 6rem;
+  }
+
+  .scuba-guide-notes :global(li) {
+    scroll-margin-top: 7.5rem;
   }
 
   .scuba-guide :global(h2) {
