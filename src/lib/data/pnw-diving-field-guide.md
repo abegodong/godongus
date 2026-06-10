@@ -73,6 +73,8 @@ I went straight into the Open Water course — skipping the Discover Scuba try-d
 
 What I didn't expect was the question that came next. Back home in Seattle, I started wondering what it would take to dive like this regularly — not on vacation, but in my own backyard. That question is what led me to the cold, green, world-class diving of the Salish Sea, and ultimately to this guide.
 
+I am still learning, and still deeply fascinated by the beauty of what Puget Sound and the wider Salish Sea have to offer — not only the life underwater, but the diving community that has grown around it. I am not trying to rush through any of it. I am taking my time, letting each dive, each class, and each new connection pull me a little farther in, so I can be fully immersed in the place rather than simply passing through it.
+
 Writing this stirs a warmth I didn't expect: it brings back happy memories from a childhood I hadn't revisited in a long time. People often ask me whether I'd rather be high up in the mountains or down low by the sea. I love the mountains, but my answer never changes: the sea. I have always been drawn to the water more than to anywhere else — and perhaps that is only fitting, since roughly 71 percent of the Earth's surface is covered by it. The sea is most of the world, and to me it has always felt like home.
 
 ---
