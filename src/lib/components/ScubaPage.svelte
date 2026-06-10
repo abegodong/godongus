@@ -9,10 +9,7 @@
   const guideUi = {
     byline: 'Written by Abraham Godong',
     heroCaption: 'A shareable field guide for divers making the leap into cold Pacific Northwest water.',
-    jumpToPart: 'Jump to a part',
     partNavigation: 'Salish Sea diving guide parts',
-    tableOfContents: 'Salish Sea diving guide table of contents',
-    contents: 'Contents',
     sourcesAndNotes: 'Sources and Notes',
   }
   const stableHeadingIds = [
@@ -250,44 +247,96 @@
   }
 
   const guide = parseGuide(guideMarkdown)
-  $: prefaceLink = guide.toc.find((item) => item.id === 'preface')
-  $: partLinks = guide.toc.filter((item) => item.id.startsWith('part-'))
+  $: guideLinks = guide.toc.filter((item) => item.id === 'preface' || item.id.startsWith('part-'))
+  $: currentGuideIndex = Math.max(0, guideLinks.findIndex((item) => item.id === activeGuideId))
+  $: currentGuideItem = guideLinks[currentGuideIndex] || guideLinks[0]
+  $: previousGuideItem = currentGuideIndex > 0 ? guideLinks[currentGuideIndex - 1] : null
+  $: nextGuideItem = currentGuideIndex < guideLinks.length - 1 ? guideLinks[currentGuideIndex + 1] : null
   let guideBodyElement
-  let contentsVisible = false
+  let articleTransitioning = false
+  let guideNavOpen = false
+  let activeGuideId = 'preface'
+  let transitionTimer
+
+  const jumpToSection = (target) => {
+    const guideNav = document.querySelector('[aria-label="Guide navigation"]')
+    const guideRect = guideNav?.getBoundingClientRect()
+    const guideOffset = guideRect ? guideRect.top + guideRect.height + 18 : 112
+    const top = target.getBoundingClientRect().top + window.scrollY - guideOffset
+    window.scrollTo({ top, behavior: 'auto' })
+  }
+
+  const navigateToSectionWithFade = async (event, id) => {
+    event.preventDefault()
+
+    const target = document.getElementById(id)
+    if (!target) return
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) {
+      jumpToSection(target)
+      window.history.pushState(null, '', `#${id}`)
+      activeGuideId = id
+      guideNavOpen = false
+      return
+    }
+
+    window.clearTimeout(transitionTimer)
+    articleTransitioning = true
+
+    await new Promise((resolve) => {
+      transitionTimer = window.setTimeout(resolve, 160)
+    })
+
+    jumpToSection(target)
+    window.history.pushState(null, '', `#${id}`)
+    activeGuideId = id
+    guideNavOpen = false
+
+    transitionTimer = window.setTimeout(() => {
+      articleTransitioning = false
+    }, 80)
+  }
+
+  const handleGuideNavOverlayKeydown = (event) => {
+    if (event.key === 'Escape') {
+      guideNavOpen = false
+    }
+  }
 
   onMount(async () => {
     await tick()
 
-    const updateContentsVisibility = () => {
-      if (!guideBodyElement) {
-        contentsVisible = false
-        return
-      }
+    const updateActiveGuideId = () => {
+      const markerOffset = 140
+      const activeItem = [...guideLinks].reverse().find((item) => {
+        const element = document.getElementById(item.id)
+        return element && element.getBoundingClientRect().top <= markerOffset
+      })
 
-      contentsVisible = guideBodyElement.getBoundingClientRect().top <= 112
+      activeGuideId = activeItem?.id || guideLinks[0]?.id || 'preface'
     }
 
-    updateContentsVisibility()
-    window.addEventListener('scroll', updateContentsVisibility, { passive: true })
-    window.addEventListener('resize', updateContentsVisibility)
+    updateActiveGuideId()
+    window.addEventListener('scroll', updateActiveGuideId, { passive: true })
 
     if (window.location.hash) {
       const target = document.getElementById(window.location.hash.slice(1))
 
       if (target) {
-        target.scrollIntoView()
-        window.requestAnimationFrame(updateContentsVisibility)
+        jumpToSection(target)
+        window.requestAnimationFrame(updateActiveGuideId)
       }
     }
 
     return () => {
-      window.removeEventListener('scroll', updateContentsVisibility)
-      window.removeEventListener('resize', updateContentsVisibility)
+      window.clearTimeout(transitionTimer)
+      window.removeEventListener('scroll', updateActiveGuideId)
     }
   })
 </script>
 
-<div class="relative z-10 flex w-full max-w-6xl flex-col gap-12 pb-20 pt-24 md:pt-28">
+<div class={['scuba-guide-shell relative z-10 flex w-full max-w-6xl flex-col gap-12 pb-20 pt-24 md:pt-28', articleTransitioning && 'scuba-guide-transitioning']}>
   <header class="grid gap-10 lg:grid-cols-[0.78fr_1fr] lg:items-end">
     <div class="flex flex-col gap-6">
       <p class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
@@ -320,76 +369,127 @@
     </figure>
   </header>
 
-  <section class="grid gap-5 border-y border-[var(--color-border)] py-7" aria-labelledby="scuba-guide-navigation">
-    <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
-      <div class="grid gap-2">
-        <h2 id="scuba-guide-navigation" class="text-sm font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-          {guideUi.jumpToPart}
-        </h2>
-        <p class="max-w-2xl text-sm leading-relaxed text-[var(--color-text-secondary)]">
-          Use this part list to move through the guide without having to scroll the whole article.
+  <section
+    class="sticky top-20 z-30 w-full max-w-[66ch] self-center border border-[var(--color-border)] bg-[rgb(250_248_241_/_0.82)] px-3 py-3 shadow-sm backdrop-blur-md md:top-16 lg:top-4"
+    aria-label="Guide navigation"
+  >
+    <div class="grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+      <button
+        class="border border-[var(--color-border)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-primary)] transition hover:border-[var(--color-accent)] hover:bg-[rgb(237_244_241_/_0.76)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        type="button"
+        aria-expanded={guideNavOpen}
+        aria-controls="scuba-guide-parts-panel"
+        onclick={() => (guideNavOpen = true)}
+      >
+        Guide
+      </button>
+
+      <div class="min-w-0">
+        <p class="text-[0.68rem] font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
+          Current section
+        </p>
+        <p class="truncate text-sm font-semibold leading-relaxed text-[var(--color-text-primary)] sm:text-base">
+          {currentGuideItem?.text}
         </p>
       </div>
 
-      {#if prefaceLink}
-        <a
-          class="slide-link w-fit pb-1 text-sm font-semibold uppercase leading-relaxed tracking-widest text-[var(--color-text-secondary)] sm:justify-self-end"
-          href={`#${prefaceLink.id}`}
-        >
-          <span>{prefaceLink.text}</span>
-        </a>
-      {/if}
-    </div>
+      <div class="grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+        {#if previousGuideItem}
+          <a
+            class="border border-[var(--color-border)] px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            href={`#${previousGuideItem.id}`}
+            onclick={(event) => navigateToSectionWithFade(event, previousGuideItem.id)}
+          >
+            Previous
+          </a>
+        {:else}
+          <span class="border border-transparent px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] opacity-40">
+            Previous
+          </span>
+        {/if}
 
-    <nav aria-label={guideUi.partNavigation}>
-      <ol class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {#each partLinks as item}
-          <li>
-            <a
-              class="group grid h-full gap-2 border border-[var(--color-border)] bg-[rgb(237_244_241_/_0.42)] p-4 transition duration-200 hover:border-[var(--color-accent)] hover:bg-[rgb(237_244_241_/_0.78)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-              href={`#${item.id}`}
-              aria-label={item.text}
-            >
-              <span class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-                {getPartLabel(item)}
-              </span>
-              <span class="text-base font-semibold leading-snug text-[var(--color-text-primary)]">
-                {getPartTitle(item)}
-              </span>
-            </a>
-          </li>
-        {/each}
-      </ol>
-    </nav>
+        {#if nextGuideItem}
+          <a
+            class="border border-[var(--color-border)] px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            href={`#${nextGuideItem.id}`}
+            onclick={(event) => navigateToSectionWithFade(event, nextGuideItem.id)}
+          >
+            Next
+          </a>
+        {:else}
+          <span class="border border-transparent px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] opacity-40">
+            Next
+          </span>
+        {/if}
+      </div>
+    </div>
   </section>
 
-  <div class="grid gap-10 lg:block lg:pl-72" bind:this={guideBodyElement}>
-    <aside
-      class={[
-        'hidden lg:fixed lg:left-[max(2rem,calc((100vw-72rem)/2))] lg:top-24 lg:z-20 lg:block lg:w-52 lg:transition lg:duration-300',
-        contentsVisible ? 'lg:translate-y-0 lg:opacity-100' : 'lg:pointer-events-none lg:translate-y-3 lg:opacity-0',
-      ]}
+  {#if guideNavOpen}
+    <div
+      class="fixed inset-0 z-50 grid place-items-center bg-[rgb(16_32_30_/_0.28)] p-4 backdrop-blur-sm"
+      role="presentation"
+      onclick={() => (guideNavOpen = false)}
+      onkeydown={handleGuideNavOverlayKeydown}
     >
-      <nav
-        class="max-h-[calc(100svh-7rem)] overflow-auto border-l border-[var(--color-border)] pl-5 pr-2"
-        aria-label={guideUi.tableOfContents}
+      <div
+        id="scuba-guide-parts-panel"
+        class="w-full max-w-[26rem] max-h-[82svh] overflow-auto border border-[var(--color-border)] bg-[var(--color-background)] p-5 shadow-xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label={guideUi.partNavigation}
+        tabindex="-1"
+        onclick={(event) => event.stopPropagation()}
+        onkeydown={(event) => event.stopPropagation()}
       >
-        <p class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-          {guideUi.contents}
-        </p>
-        <ol class="mt-5 grid gap-3">
-          {#each guide.toc as item}
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
+              Guide navigation
+            </p>
+            <h2 class="mt-2 font-greeting text-3xl font-semibold italic leading-none text-[var(--color-text-primary)]">
+              Choose a section
+            </h2>
+          </div>
+          <button
+            class="border border-[var(--color-border)] px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            type="button"
+            onclick={() => (guideNavOpen = false)}
+          >
+            Close
+          </button>
+        </div>
+
+        <ol class="mt-6 grid gap-2">
+          {#each guideLinks as item}
             <li>
-              <a class="text-xs leading-relaxed text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]" href={`#${item.id}`}>
-                {item.text}
+              <a
+                class={[
+                  'grid gap-1 border px-3 py-3 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
+                  item.id === activeGuideId
+                    ? 'border-[var(--color-accent)] bg-[rgb(237_244_241_/_0.86)]'
+                    : 'border-[var(--color-border)] hover:border-[var(--color-accent)] hover:bg-[rgb(237_244_241_/_0.54)]',
+                ]}
+                href={`#${item.id}`}
+                aria-current={item.id === activeGuideId ? 'location' : undefined}
+                onclick={(event) => navigateToSectionWithFade(event, item.id)}
+              >
+                <span class="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
+                  {getPartLabel(item)}
+                </span>
+                <span class="text-base font-semibold leading-snug text-[var(--color-text-primary)]">
+                  {getPartTitle(item)}
+                </span>
               </a>
             </li>
           {/each}
         </ol>
-      </nav>
-    </aside>
+      </div>
+    </div>
+  {/if}
 
-    <article class="scuba-guide min-w-0">
+  <div class="grid justify-items-center" bind:this={guideBodyElement}>
+    <article class="scuba-guide min-w-0 w-full max-w-[66ch]">
       {@html guide.html}
 
       {#if guide.footnotes.length}
@@ -407,8 +507,13 @@
 </div>
 
 <style>
-  :global(html) {
-    scroll-behavior: smooth;
+  .scuba-guide-shell {
+    opacity: 1;
+    transition: opacity 180ms ease;
+  }
+
+  .scuba-guide-transitioning {
+    opacity: 0;
   }
 
   .scuba-guide {
@@ -638,6 +743,16 @@
     .scuba-guide :global(h2) {
       margin-top: 4.25rem;
       padding: 0.9rem 1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scuba-guide-shell {
+      transition: none;
+    }
+
+    .scuba-guide-transitioning {
+      opacity: 1;
     }
   }
 

@@ -939,7 +939,8 @@
 
 <main
   class={[
-    'relative flex min-h-svh items-center justify-center overflow-hidden bg-[var(--color-background)] pl-6 text-[var(--color-text-primary)]',
+    'relative flex min-h-svh items-center justify-center bg-[var(--color-background)] pl-6 text-[var(--color-text-primary)]',
+    pathname === '/salish-sea-diving' ? 'overflow-visible' : 'overflow-hidden',
     pathname === '/salish-sea-diving' ? 'pr-6' : 'pr-[calc(var(--signature-size)+2rem)]',
     pathname === '/' ? 'home-background' : '',
   ]}
