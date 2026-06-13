@@ -10,9 +10,24 @@
   const sunnysideBeach = [47.1787087, -122.5898493]
   const noaaChartExportUrl =
     'https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/NOAAChartDisplay/MapServer/exts/MaritimeChartService/MapServer/export'
+  const dnrBathymetryExportUrl =
+    'https://gis.dnr.wa.gov/image/rest/services/Aquatics/WA_bathymetry_CoNED_MLLW/ImageServer/exportImage'
+  const dnrBathymetryRenderingRule = JSON.stringify({ rasterFunction: 'bathy_top50m' })
   const tileSize = 256
   const earthRadius = 6378137
   const originShift = Math.PI * earthRadius
+  const depthTraceSamples = [
+    { lat: 47.17875, lng: -122.5902, depthMeters: 0 },
+    { lat: 47.1788375, lng: -122.59095, depthMeters: 8.8 },
+    { lat: 47.178925, lng: -122.5917, depthMeters: 14.1 },
+    { lat: 47.1790125, lng: -122.59245, depthMeters: 17.4 },
+    { lat: 47.1791, lng: -122.5932, depthMeters: 20.6 },
+    { lat: 47.1791875, lng: -122.59395, depthMeters: 24.2 },
+    { lat: 47.179275, lng: -122.5947, depthMeters: 27.1 },
+    { lat: 47.1793625, lng: -122.59545, depthMeters: 29.3 },
+    { lat: 47.17945, lng: -122.5962, depthMeters: 32 },
+  ]
+  const labeledDepthSampleIndexes = new Set([0, 1, 3, 5, 8])
 
   let mapElement
   let map
@@ -26,6 +41,19 @@
     const minY = originShift - (y + 1) * tileSize * resolution
 
     return [minX, minY, maxX, maxY].join(',')
+  }
+
+  const formatDepth = (depthMeters) => {
+    if (depthMeters <= 0.5) return 'shore'
+
+    return `${Math.round(depthMeters)} m / ${Math.round(depthMeters * 3.28084)} ft`
+  }
+
+  const getTraceColor = (depthMeters) => {
+    if (depthMeters < 10) return '#14b8a6'
+    if (depthMeters < 20) return '#0d7c86'
+    if (depthMeters < 28) return '#2563eb'
+    return '#1e3a8a'
   }
 
   const createNoaaChartLayer = (L) =>
@@ -50,6 +78,33 @@
         tile.onload = () => done(null, tile)
         tile.onerror = () => done(new Error('NOAA chart tile failed to load'), tile)
         tile.src = `${noaaChartExportUrl}?${params.toString()}`
+
+        return tile
+      },
+    })
+
+  const createDnrBathymetryLayer = (L) =>
+    L.GridLayer.extend({
+      createTile(coords, done) {
+        const tile = document.createElement('img')
+        const params = new URLSearchParams({
+          bbox: tileBoundsToWebMercatorBbox(coords),
+          bboxSR: '3857',
+          imageSR: '3857',
+          size: `${tileSize},${tileSize}`,
+          format: 'png32',
+          transparent: 'true',
+          renderingRule: dnrBathymetryRenderingRule,
+          f: 'image',
+        })
+
+        tile.alt = ''
+        tile.decoding = 'async'
+        tile.width = tileSize
+        tile.height = tileSize
+        tile.onload = () => done(null, tile)
+        tile.onerror = () => done(new Error('DNR bathymetry tile failed to load'), tile)
+        tile.src = `${dnrBathymetryExportUrl}?${params.toString()}`
 
         return tile
       },
@@ -80,6 +135,56 @@
       },
     })
 
+  const createDepthTraceLayer = (L) => {
+    const traceLayer = L.layerGroup()
+
+    depthTraceSamples.slice(1).forEach((sample, index) => {
+      const previousSample = depthTraceSamples[index]
+      const averageDepth = (previousSample.depthMeters + sample.depthMeters) / 2
+
+      L.polyline(
+        [
+          [previousSample.lat, previousSample.lng],
+          [sample.lat, sample.lng],
+        ],
+        {
+          color: getTraceColor(averageDepth),
+          weight: 5,
+          opacity: 0.95,
+          lineCap: 'round',
+          lineJoin: 'round',
+        }
+      ).addTo(traceLayer)
+    })
+
+    depthTraceSamples.forEach((sample, index) => {
+      const marker = L.circleMarker([sample.lat, sample.lng], {
+        radius: labeledDepthSampleIndexes.has(index) ? 5 : 3,
+        weight: 2,
+        color: '#10201e',
+        fillColor: getTraceColor(sample.depthMeters),
+        fillOpacity: 0.95,
+      }).addTo(traceLayer)
+
+      if (labeledDepthSampleIndexes.has(index)) {
+        marker.bindTooltip(formatDepth(sample.depthMeters), {
+          permanent: true,
+          direction: 'top',
+          offset: [0, -4],
+          className: 'depth-trace-label',
+        })
+      } else {
+        marker.bindTooltip(formatDepth(sample.depthMeters), {
+          direction: 'top',
+          offset: [0, -4],
+          className: 'depth-trace-label',
+        })
+      }
+    })
+
+    return traceLayer
+  }
+
   onMount(() => {
     let cancelled = false
 
@@ -89,15 +194,23 @@
       if (!mapElement || cancelled) return
 
       const NoaaChartLayer = createNoaaChartLayer(L)
+      const DnrBathymetryLayer = createDnrBathymetryLayer(L)
       const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       })
       const noaaLayer = new NoaaChartLayer({
         tileSize,
-        opacity: 0.82,
+        opacity: 0.72,
         attribution: 'NOAA Office of Coast Survey',
       })
+      const dnrBathymetryLayer = new DnrBathymetryLayer({
+        tileSize,
+        opacity: 0.62,
+        className: 'dnr-bathymetry-tile',
+        attribution: 'WA DNR / USGS CoNED',
+      })
+      const depthTraceLayer = createDepthTraceLayer(L)
       const layerControlCollapsed = window.matchMedia('(max-width: 720px)').matches
 
       map = L.map(mapElement, {
@@ -105,7 +218,7 @@
         zoom: 16,
         minZoom: 11,
         maxZoom: 19,
-        layers: [osmLayer, noaaLayer],
+        layers: [osmLayer, dnrBathymetryLayer, depthTraceLayer],
         scrollWheelZoom: true,
         zoomControl: !fullSize,
       })
@@ -130,7 +243,11 @@
       L.control
         .layers(
           { OpenStreetMap: osmLayer },
-          { [t.diveMap.noaaLayer]: noaaLayer },
+          {
+            [t.diveMap.depthLayer]: dnrBathymetryLayer,
+            [t.diveMap.depthTrace]: depthTraceLayer,
+            [t.diveMap.noaaLayer]: noaaLayer,
+          },
           {
             collapsed: layerControlCollapsed,
             position: fullSize ? 'bottomright' : 'topright',
@@ -164,6 +281,9 @@
         <h1 class="font-greeting mt-1 text-3xl font-semibold italic leading-none text-[var(--color-text-primary)]">
           {t.diveMap.title}
         </h1>
+        <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
+          {t.diveMap.depthTraceSummary}
+        </p>
       </div>
 
       <a
@@ -303,6 +423,11 @@
     font-family: inherit;
   }
 
+  .sunnyside-map :global(.dnr-bathymetry-tile) {
+    mix-blend-mode: multiply;
+    filter: saturate(1.12) contrast(1.08);
+  }
+
   .sunnyside-map :global(.leaflet-control-layers),
   .sunnyside-map :global(.leaflet-control-zoom a),
   .sunnyside-map :global(.sunnyside-recenter-button),
@@ -377,6 +502,21 @@
     margin: 0.85rem 1rem;
     color: var(--color-text-primary);
     font-weight: 700;
+  }
+
+  .sunnyside-map :global(.depth-trace-label) {
+    border: 1px solid rgb(16 32 30 / 0.2);
+    background: rgb(248 250 247 / 0.9);
+    box-shadow: 0 8px 22px rgb(16 32 30 / 0.12);
+    color: var(--color-text-primary);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .sunnyside-map :global(.depth-trace-label::before) {
+    border-top-color: rgb(248 250 247 / 0.9);
   }
 
   @keyframes map-reveal {
