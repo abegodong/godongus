@@ -21,6 +21,9 @@
   const deadReckoningPoisEndpoint = '/api/dead-reckoning-pois'
   const depthContoursEndpoint = '/data/sunnyside-depth-contours.json'
   const pipelineLabelReference = { lat: 47.1789348, lng: -122.5929285 }
+  const contourLabelReferences = {
+    40: { lat: 47.1782797, lng: -122.5922156 },
+  }
 
   let mapElement
   let map
@@ -296,8 +299,9 @@
     return measurement?.type === 'depth' ? measurement.meters : null
   }
 
-  const getClosestContourPointToPipeline = (line) => {
-    const projectedPipelineLabelReference = latLngToWebMercator(pipelineLabelReference)
+  const getClosestContourPointToPipeline = (line, depthFeet) => {
+    const labelReference = contourLabelReferences[depthFeet] || pipelineLabelReference
+    const projectedPipelineLabelReference = latLngToWebMercator(labelReference)
 
     return line.reduce(
       (closestPoint, [lat, lng]) => {
@@ -485,7 +489,7 @@
           contour.lines.forEach((line) => {
             if (line.length < 2) return
 
-            const closestPoint = getClosestContourPointToPipeline(line)
+            const closestPoint = getClosestContourPointToPipeline(line, contour.depthFeet)
 
             if (closestPoint.distanceSquared < labelPoint.distanceSquared) {
               labelPoint = closestPoint
