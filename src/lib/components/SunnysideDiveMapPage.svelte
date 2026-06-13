@@ -490,7 +490,8 @@
       const NoaaChartLayer = createNoaaChartLayer(L)
       const DnrBathymetryLayer = createDnrBathymetryLayer(L)
       const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
+        maxNativeZoom: 19,
+        maxZoom: 24,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       })
       const noaaLayer = new NoaaChartLayer({
@@ -510,9 +511,9 @@
 
       map = L.map(mapElement, {
         center: sunnysideBeach,
-        zoom: 16,
+        zoom: 18,
         minZoom: 11,
-        maxZoom: 19,
+        maxZoom: 24,
         layers: [osmLayer, dnrBathymetryLayer, depthTraceLayer, deadReckoningPoisLayer],
         scrollWheelZoom: true,
         zoomControl: !fullSize,
