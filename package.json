@@ -19,6 +19,7 @@
     "wrangler": "^4.98.0"
   },
   "dependencies": {
-    "@fontsource-variable/cormorant-garamond": "^5.2.6"
+    "@fontsource-variable/cormorant-garamond": "^5.2.6",
+    "leaflet": "^1.9.4"
   }
 }

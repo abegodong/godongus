@@ -25,6 +25,7 @@
           { href: '/', label: 'Return home' },
           { href: '/insights', label: 'Writing' },
           { href: '/salish-sea-diving', label: 'Salish Sea diving' },
+          { href: '/sunnyside-dive-map', label: 'Sunnyside dive map' },
           { href: '/hello', label: 'Write to me' },
         ],
       },
@@ -75,6 +76,23 @@
         feedBody:
           'This page is ready for a first-party dive archive, so the photos and videos can live here cleanly without depending on a social feed.',
         emptyState: 'Dive entries will appear here as the archive grows.',
+      },
+      diveMap: {
+        eyebrow: 'Dive map',
+        title: 'Sunnyside Dive Map.',
+        intro:
+          'An interactive starting point for exploring Sunnyside Beach in Steilacoom, with OpenStreetMap as the base layer and NOAA chart detail over the water.',
+        locationLabel: 'Centered on',
+        location: 'Sunnyside Beach, Steilacoom, Washington',
+        layerNote:
+          'Use the layer control to compare the street map with NOAA chart detail. Treat this as a planning reference, not a substitute for local conditions, training, or a dive briefing.',
+        noaaLayer: 'NOAA chart overlay',
+        marker: 'Sunnyside Beach dive area',
+        mapLabel: 'Interactive map of Sunnyside Beach with NOAA chart overlay',
+        loading: 'Loading map',
+        openFullMap: 'Open full map',
+        backToMapPage: 'Back to map page',
+        recenter: 'Recenter map',
       },
       error: {
         label: 'Error',
@@ -128,6 +146,18 @@
               'A Pacific Northwest diving field guide by Abraham Godong, with practical notes on cold-water training, gear, tides, local sites, and Puget Sound marine life.',
             robots: 'index, follow',
           },
+          '/sunnyside-dive-map': {
+            title: 'Sunnyside Dive Map | Abraham Godong',
+            description:
+              'An interactive Sunnyside Beach dive map for Steilacoom, Washington, with OpenStreetMap and NOAA chart overlay layers.',
+            robots: 'index, follow',
+          },
+          '/sunnyside-dive-map/full': {
+            title: 'Full Screen Sunnyside Dive Map | Abraham Godong',
+            description:
+              'Full screen interactive dive map for Sunnyside Beach in Steilacoom, Washington, with OpenStreetMap and NOAA chart overlay layers.',
+            robots: 'index, follow',
+          },
           '/style-guide': {
             title: 'Private Style Guide | Abraham Godong',
             description: 'A private visual style guide for Abraham Godong’s personal website.',
@@ -161,6 +191,7 @@
           { href: '/', label: 'Kembali ke beranda' },
           { href: '/insights', label: 'Tulisan' },
           { href: '/salish-sea-diving', label: 'Salish Sea diving' },
+          { href: '/sunnyside-dive-map', label: 'Peta selam Sunnyside' },
           { href: '/hello', label: 'Tulis pesan' },
         ],
       },
@@ -210,6 +241,23 @@
         feedBody:
           'Halaman ini siap menjadi arsip penyelaman utama, sehingga foto dan video dapat hidup di sini tanpa bergantung pada feed sosial.',
         emptyState: 'Catatan penyelaman akan muncul di sini saat arsip bertambah.',
+      },
+      diveMap: {
+        eyebrow: 'Peta selam',
+        title: 'Peta Selam Sunnyside.',
+        intro:
+          'Titik awal interaktif untuk menjelajahi Sunnyside Beach di Steilacoom, dengan OpenStreetMap sebagai peta dasar dan detail chart NOAA di area air.',
+        locationLabel: 'Berpusat di',
+        location: 'Sunnyside Beach, Steilacoom, Washington',
+        layerNote:
+          'Gunakan kontrol layer untuk membandingkan peta jalan dengan detail chart NOAA. Anggap ini sebagai referensi perencanaan, bukan pengganti kondisi lokal, pelatihan, atau briefing penyelaman.',
+        noaaLayer: 'Overlay chart NOAA',
+        marker: 'Area selam Sunnyside Beach',
+        mapLabel: 'Peta interaktif Sunnyside Beach dengan overlay chart NOAA',
+        loading: 'Memuat peta',
+        openFullMap: 'Buka peta penuh',
+        backToMapPage: 'Kembali ke halaman peta',
+        recenter: 'Pusatkan ulang peta',
       },
       error: {
         label: 'Error',
@@ -263,6 +311,18 @@
               'Panduan diving Pacific Northwest oleh Abraham Godong, dengan catatan praktis tentang latihan air dingin, perlengkapan, pasang surut, lokasi lokal, dan kehidupan laut Puget Sound.',
             robots: 'index, follow',
           },
+          '/sunnyside-dive-map': {
+            title: 'Peta Selam Sunnyside | Abraham Godong',
+            description:
+              'Peta selam interaktif Sunnyside Beach di Steilacoom, Washington, dengan layer OpenStreetMap dan chart NOAA.',
+            robots: 'index, follow',
+          },
+          '/sunnyside-dive-map/full': {
+            title: 'Peta Selam Sunnyside Layar Penuh | Abraham Godong',
+            description:
+              'Peta selam layar penuh untuk Sunnyside Beach di Steilacoom, Washington, dengan layer OpenStreetMap dan chart NOAA.',
+            robots: 'index, follow',
+          },
           '/style-guide': {
             title: 'Style Guide Pribadi | Abraham Godong',
             description: 'Panduan visual pribadi untuk situs Abraham Godong.',
@@ -296,6 +356,7 @@
           { href: '/', label: 'Volver al inicio' },
           { href: '/insights', label: 'Escritos' },
           { href: '/salish-sea-diving', label: 'Salish Sea diving' },
+          { href: '/sunnyside-dive-map', label: 'Mapa de buceo Sunnyside' },
           { href: '/hello', label: 'Escríbeme' },
         ],
       },
@@ -345,6 +406,23 @@
         feedBody:
           'Esta página está lista para convertirse en un archivo propio de inmersiones, para que las fotos y videos vivan aquí sin depender de un feed social.',
         emptyState: 'Las entradas de buceo aparecerán aquí a medida que crezca el archivo.',
+      },
+      diveMap: {
+        eyebrow: 'Mapa de buceo',
+        title: 'Mapa de Buceo Sunnyside.',
+        intro:
+          'Un punto de partida interactivo para explorar Sunnyside Beach en Steilacoom, con OpenStreetMap como capa base y detalle náutico de NOAA sobre el agua.',
+        locationLabel: 'Centrado en',
+        location: 'Sunnyside Beach, Steilacoom, Washington',
+        layerNote:
+          'Usa el control de capas para comparar el mapa de calles con el detalle náutico de NOAA. Trátalo como referencia de planificación, no como reemplazo de condiciones locales, entrenamiento o briefing de buceo.',
+        noaaLayer: 'Capa náutica NOAA',
+        marker: 'Área de buceo de Sunnyside Beach',
+        mapLabel: 'Mapa interactivo de Sunnyside Beach con capa náutica NOAA',
+        loading: 'Cargando mapa',
+        openFullMap: 'Abrir mapa completo',
+        backToMapPage: 'Volver a la página del mapa',
+        recenter: 'Volver a centrar el mapa',
       },
       error: {
         label: 'Error',
@@ -396,6 +474,18 @@
             title: 'Bucear el Pacific Northwest | Abraham Godong',
             description:
               'Una guía de buceo del Pacific Northwest por Abraham Godong, con notas prácticas sobre entrenamiento en agua fría, equipo, mareas, sitios locales y vida marina de Puget Sound.',
+            robots: 'index, follow',
+          },
+          '/sunnyside-dive-map': {
+            title: 'Mapa de Buceo Sunnyside | Abraham Godong',
+            description:
+              'Mapa interactivo de buceo para Sunnyside Beach en Steilacoom, Washington, con OpenStreetMap y capa náutica NOAA.',
+            robots: 'index, follow',
+          },
+          '/sunnyside-dive-map/full': {
+            title: 'Mapa de Buceo Sunnyside en Pantalla Completa | Abraham Godong',
+            description:
+              'Mapa interactivo en pantalla completa para Sunnyside Beach en Steilacoom, Washington, con OpenStreetMap y capa náutica NOAA.',
             robots: 'index, follow',
           },
           '/style-guide': {
@@ -458,6 +548,7 @@
   let ErrorPageComponent
   let InsightsPageComponent
   let ScubaPageComponent
+  let SunnysideDiveMapPageComponent
   let turnstileLoadPromise
   let turnstileWidgetId = null
   let pendingTurnstileResolve
@@ -475,7 +566,9 @@
   $: errorTitle = errorStatus === '500' ? t.error.title500 : t.error.title404
   $: currentQuote = errorQuotes[visibleQuoteIndex]
   $: activeSeo = isErrorRoute && !routeSeo[pathname] ? routeSeo['/404'] : routeSeo[pathname] || defaultSeo
-  $: signatureVisible = pathname !== '/salish-sea-diving'
+  $: fullBleedRoute = pathname === '/sunnyside-dive-map/full'
+  $: wideContentRoute = pathname === '/salish-sea-diving' || pathname === '/sunnyside-dive-map' || fullBleedRoute
+  $: signatureVisible = !wideContentRoute
 
   $: if (robotsMeta && activeSeo) {
     applySeo()
@@ -542,6 +635,10 @@
 
     if (nextPathname === '/salish-sea-diving' && !ScubaPageComponent) {
       ScubaPageComponent = (await import('./lib/components/ScubaPage.svelte')).default
+    }
+
+    if ((nextPathname === '/sunnyside-dive-map' || nextPathname === '/sunnyside-dive-map/full') && !SunnysideDiveMapPageComponent) {
+      SunnysideDiveMapPageComponent = (await import('./lib/components/SunnysideDiveMapPage.svelte')).default
     }
 
     if ((nextPathname === '/404' || nextPathname === '/500' || !knownRoutes.includes(nextPathname)) && !ErrorPageComponent) {
@@ -939,9 +1036,10 @@
 
 <main
   class={[
-    'relative flex min-h-svh items-center justify-center bg-[var(--color-background)] pl-6 text-[var(--color-text-primary)]',
-    pathname === '/salish-sea-diving' ? 'overflow-visible' : 'overflow-hidden',
-    pathname === '/salish-sea-diving' ? 'pr-6' : 'pr-[calc(var(--signature-size)+2rem)]',
+    'relative flex min-h-svh items-center justify-center bg-[var(--color-background)] text-[var(--color-text-primary)]',
+    fullBleedRoute ? 'overflow-hidden' : wideContentRoute ? 'overflow-visible' : 'overflow-hidden',
+    fullBleedRoute ? 'p-0' : 'pl-6',
+    fullBleedRoute ? '' : wideContentRoute ? 'pr-6' : 'pr-[calc(var(--signature-size)+2rem)]',
     pathname === '/' ? 'home-background' : '',
   ]}
   style="--signature-size: clamp(2.5rem, 10svh, 7rem)"
@@ -1023,6 +1121,15 @@
   {:else if pathname === '/salish-sea-diving'}
     {#if ScubaPageComponent}
       <svelte:component this={ScubaPageComponent} {t} />
+    {/if}
+  {:else if pathname === '/sunnyside-dive-map' || pathname === '/sunnyside-dive-map/full'}
+    {#if SunnysideDiveMapPageComponent}
+      <svelte:component
+        this={SunnysideDiveMapPageComponent}
+        {t}
+        fullSize={pathname === '/sunnyside-dive-map/full'}
+        onNavigate={navigate}
+      />
     {/if}
   {:else if pathname === '/style-guide'}
     <div class="relative z-10 flex w-full max-w-5xl flex-col gap-12 pb-16 pt-24 md:pt-28">

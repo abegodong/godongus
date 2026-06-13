@@ -1,4 +1,4 @@
-export const knownRoutes = ['/', '/hello', '/insights', '/salish-sea-diving', '/style-guide', '/404', '/500']
+export const knownRoutes = ['/', '/hello', '/insights', '/salish-sea-diving', '/sunnyside-dive-map', '/sunnyside-dive-map/full', '/style-guide', '/404', '/500']
 
 export const siteName = 'Abraham Godong'
 
