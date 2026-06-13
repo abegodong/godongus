@@ -47,7 +47,7 @@
   const formatDepth = (depthMeters) => {
     if (depthMeters <= 0.5) return 'shore'
 
-    return `${Math.round(depthMeters)} m / ${Math.round(depthMeters * 3.28084)} ft`
+    return `${Math.round(depthMeters * 3.28084)} ft / ${Math.round(depthMeters)} m`
   }
 
   const getTraceColor = (depthMeters) => {
