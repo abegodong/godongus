@@ -28,22 +28,7 @@
     { lat: 47.1797953, lng: -122.5944091, depthMeters: 29.6 },
   ]
   const labeledDepthSampleIndexes = new Set([0, 1, 3, 5, 6])
-  const observationPoints = [
-    {
-      name: 'Obs A',
-      description: 'Triangulation observation point A',
-      lat: 47.17825,
-      lng: -122.5900278,
-    },
-    {
-      name: 'Obs B',
-      description: 'Triangulation observation point B',
-      lat: 47.1775278,
-      lng: -122.5903056,
-    },
-  ]
   const deadReckoningPoisEndpoint = '/api/dead-reckoning-pois'
-  const triangulatedPoisEndpoint = '/api/triangulated-pois'
 
   let mapElement
   let map
@@ -73,18 +58,6 @@
   }
 
   const formatCoordinate = ({ lat, lng }) => `${lat.toFixed(6)}, ${lng.toFixed(6)}`
-
-  const getBearingDegrees = (fromPoint, toPoint) => {
-    const fromLat = fromPoint.lat * Math.PI / 180
-    const toLat = toPoint.lat * Math.PI / 180
-    const deltaLng = (toPoint.lng - fromPoint.lng) * Math.PI / 180
-    const y = Math.sin(deltaLng) * Math.cos(toLat)
-    const x = Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(deltaLng)
-
-    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360
-  }
-
-  const formatBearing = (bearing) => `${Math.round(bearing).toString().padStart(3, '0')}°`
 
   const parseCsv = (csv) => {
     const rows = []
@@ -167,42 +140,11 @@
         return {
           id: row[0] || '',
           name: row[1],
-          fromPoint: row[2] || '',
           bearing: parseOptionalNumber(row[3]),
           kickCycles: parseOptionalNumber(row[4]),
           distanceMeters: parseOptionalNumber(row[5]),
           sheetDepthFeet: parseOptionalNumber(row[8]),
           notes: row[9] || '',
-          lat: coordinate.lat,
-          lng: coordinate.lng,
-        }
-      })
-      .filter(Boolean)
-  }
-
-  const loadTriangulatedPois = async () => {
-    const response = await fetch(triangulatedPoisEndpoint, { cache: 'no-store' })
-
-    if (!response.ok) {
-      throw new Error('Triangulated POI sheet request failed')
-    }
-
-    const rows = parseCsv(await response.text())
-
-    return rows
-      .map((row) => {
-        const coordinate = parseCoordinate(row[13] || '')
-
-        if (!coordinate || !row[1]) {
-          return null
-        }
-
-        return {
-          id: row[0] || '',
-          name: row[1],
-          sheetDepthFeet: parseOptionalNumber(row[2]),
-          quality: row[10] || '',
-          notes: row[11] || '',
           lat: coordinate.lat,
           lng: coordinate.lng,
         }
@@ -332,10 +274,10 @@
     L.divIcon({
       className: 'dead-reckoning-poi-marker',
       html: getPoiMarkerHtml(poi, differenceFeet),
-      iconSize: [36, 36],
-      iconAnchor: [18, 18],
-      popupAnchor: [0, -18],
-      tooltipAnchor: [0, -18],
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+      popupAnchor: [0, -12],
+      tooltipAnchor: [0, -12],
     })
 
   const latLngToWebMercator = ({ lat, lng }) => {
@@ -376,21 +318,7 @@
     return Math.max(0, Math.abs(value))
   }
 
-  const getBearingRows = (targetPoint) =>
-    observationPoints
-      .map((point) => {
-        const bearing = formatBearing(getBearingDegrees(point, targetPoint))
-
-        return `
-          <div class="gps-coordinate-popup-row">
-            <span>${t.diveMap.bearing} from ${escapeHtml(point.name)}</span>
-            <strong>${bearing}</strong>
-          </div>
-        `
-      })
-      .join('')
-
-  const getGpsPopupContent = (coordinate, depthContent, targetPoint) => `
+  const getGpsPopupContent = (coordinate, depthContent) => `
     <div class="gps-coordinate-popup-content">
       <div class="gps-coordinate-popup-row">
         <span>${t.diveMap.gpsCoordinate}</span>
@@ -400,7 +328,6 @@
         <span>${t.diveMap.depth}</span>
         <strong>${depthContent}</strong>
       </div>
-      ${targetPoint ? getBearingRows(targetPoint) : ''}
     </div>
   `
 
@@ -436,14 +363,6 @@
             <dd>${escapeHtml(comparison)}</dd>
           </div>
           ${
-            poi.fromPoint
-              ? `<div>
-                  <dt>${t.diveMap.fromPoint}</dt>
-                  <dd>${escapeHtml(poi.fromPoint)}</dd>
-                </div>`
-              : ''
-          }
-          ${
             Number.isFinite(poi.distanceMeters)
               ? `<div>
                   <dt>${t.diveMap.distance}</dt>
@@ -472,58 +391,11 @@
     `
   }
 
-  const getTriangulatedPoiPopupContent = (poi) => `
-    <div class="triangulated-poi-popup-content">
-      <strong>${escapeHtml(poi.name)}</strong>
-      <dl>
-        <div>
-          <dt>${t.diveMap.gpsCoordinate}</dt>
-          <dd>${escapeHtml(formatCoordinate(poi))}</dd>
-        </div>
-        <div>
-          <dt>${t.diveMap.sheetDepth}</dt>
-          <dd>${escapeHtml(formatSheetDepth(poi.sheetDepthFeet))}</dd>
-        </div>
-        ${
-          poi.quality
-            ? `<div>
-                <dt>Quality</dt>
-                <dd>${escapeHtml(poi.quality)}</dd>
-              </div>`
-            : ''
-        }
-        ${
-          poi.notes
-            ? `<div>
-                <dt>${t.diveMap.notes}</dt>
-                <dd>${escapeHtml(poi.notes)}</dd>
-              </div>`
-            : ''
-        }
-      </dl>
-    </div>
-  `
-
-  const getObservationPointPopupContent = (point) => `
-    <div class="observation-point-popup-content">
-      <strong>${escapeHtml(point.name)}</strong>
-      <dl>
-        <div>
-          <dt>${t.diveMap.gpsCoordinate}</dt>
-          <dd>${escapeHtml(formatCoordinate(point))}</dd>
-        </div>
-        <div>
-          <dt>${t.diveMap.observationPoints}</dt>
-          <dd>${escapeHtml(point.description)}</dd>
-        </div>
-      </dl>
-    </div>
-  `
-
   const createNoaaChartLayer = (L) =>
     L.GridLayer.extend({
       createTile(coords, done) {
-        const tile = document.createElement('img')
+        const tile = document.createElement('canvas')
+        const image = new Image()
         const params = new URLSearchParams({
           bbox: tileBoundsToWebMercatorBbox(coords),
           bboxSR: '3857',
@@ -535,13 +407,57 @@
           f: 'image',
         })
 
-        tile.alt = ''
-        tile.decoding = 'async'
+        tile.setAttribute('role', 'presentation')
+        tile.className = 'noaa-chart-tile'
         tile.width = tileSize
         tile.height = tileSize
-        tile.onload = () => done(null, tile)
-        tile.onerror = () => done(new Error('NOAA chart tile failed to load'), tile)
-        tile.src = `${noaaChartExportUrl}?${params.toString()}`
+        image.crossOrigin = 'anonymous'
+        image.decoding = 'async'
+        image.onload = () => {
+          const context = tile.getContext('2d', { willReadFrequently: true })
+
+          if (!context) {
+            done(null, tile)
+            return
+          }
+
+          context.drawImage(image, 0, 0, tileSize, tileSize)
+
+          try {
+            const imageData = context.getImageData(0, 0, tileSize, tileSize)
+            const pixels = imageData.data
+
+            for (let index = 0; index < pixels.length; index += 4) {
+              const red = pixels[index]
+              const green = pixels[index + 1]
+              const blue = pixels[index + 2]
+              const alpha = pixels[index + 3]
+              const maxChannel = Math.max(red, green, blue)
+              const minChannel = Math.min(red, green, blue)
+              const luma = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+              const saturation = maxChannel === 0 ? 0 : (maxChannel - minChannel) / maxChannel
+              const isDarkInk = luma < 122
+              const isColoredLine = saturation > 0.45 && luma < 178
+              const keepPixel = alpha > 0 && (isDarkInk || isColoredLine)
+
+              if (!keepPixel) {
+                pixels[index + 3] = 0
+              } else {
+                pixels[index + 3] = Math.min(220, Math.max(96, alpha))
+              }
+            }
+
+            context.putImageData(imageData, 0, 0)
+          } catch {
+            context.globalCompositeOperation = 'destination-in'
+            context.fillStyle = 'rgb(0 0 0 / 0.72)'
+            context.fillRect(0, 0, tileSize, tileSize)
+          }
+
+          done(null, tile)
+        }
+        image.onerror = () => done(new Error('NOAA chart tile failed to load'), tile)
+        image.src = `${noaaChartExportUrl}?${params.toString()}`
 
         return tile
       },
@@ -715,74 +631,6 @@
     return poisLayer
   }
 
-  const createTriangulatedPoisLayer = (L) => {
-    const triangulatedLayer = L.layerGroup()
-
-    loadTriangulatedPois()
-      .then((pois) => {
-        pois.forEach((poi) => {
-          L.circleMarker([poi.lat, poi.lng], {
-            radius: 8,
-            weight: 3,
-            color: '#0d7c86',
-            fillColor: '#f8faf7',
-            fillOpacity: 0.42,
-            opacity: 0.95,
-            bubblingMouseEvents: false,
-            className: 'triangulated-poi-circle',
-          })
-            .addTo(triangulatedLayer)
-            .bindPopup(getTriangulatedPoiPopupContent(poi), {
-              className: 'triangulated-poi-popup',
-            })
-            .bindTooltip(poi.name, {
-              direction: 'top',
-              offset: [0, -6],
-              className: 'triangulated-poi-label',
-            })
-        })
-      })
-      .catch(() => {
-        L.popup({
-          closeButton: true,
-          className: 'triangulated-poi-popup',
-        })
-          .setLatLng(sunnysideBeach)
-          .setContent(`<div class="triangulated-poi-popup-content"><strong>${t.diveMap.triangulatedPoisUnavailable}</strong></div>`)
-          .addTo(triangulatedLayer)
-      })
-
-    return triangulatedLayer
-  }
-
-  const createObservationPointsLayer = (L) => {
-    const observationLayer = L.layerGroup()
-
-    observationPoints.forEach((point) => {
-      L.circleMarker([point.lat, point.lng], {
-        radius: 7,
-        weight: 2,
-        color: '#10201e',
-        fillColor: '#0d7c86',
-        fillOpacity: 0.86,
-        bubblingMouseEvents: false,
-        className: 'observation-point-marker',
-      })
-        .addTo(observationLayer)
-        .bindPopup(getObservationPointPopupContent(point), {
-          className: 'observation-point-popup',
-        })
-        .bindTooltip(point.name, {
-          permanent: true,
-          direction: 'top',
-          offset: [0, -5],
-          className: 'observation-point-label',
-        })
-    })
-
-    return observationLayer
-  }
-
   onMount(() => {
     let cancelled = false
 
@@ -800,7 +648,7 @@
       })
       const noaaLayer = new NoaaChartLayer({
         tileSize,
-        opacity: 0.72,
+        opacity: 0.82,
         attribution: 'NOAA Office of Coast Survey',
       })
       const dnrBathymetryLayer = new DnrBathymetryLayer({
@@ -811,8 +659,6 @@
       })
       const depthTraceLayer = createDepthTraceLayer(L)
       const deadReckoningPoisLayer = createDeadReckoningPoisLayer(L)
-      const triangulatedPoisLayer = createTriangulatedPoisLayer(L)
-      const observationPointsLayer = createObservationPointsLayer(L)
       const layerControlCollapsed = window.matchMedia('(max-width: 720px)').matches
 
       map = L.map(mapElement, {
@@ -823,10 +669,9 @@
         layers: [
           osmLayer,
           dnrBathymetryLayer,
+          noaaLayer,
           depthTraceLayer,
           deadReckoningPoisLayer,
-          triangulatedPoisLayer,
-          observationPointsLayer,
         ],
         scrollWheelZoom: true,
         zoomControl: !fullSize,
@@ -839,7 +684,7 @@
           className: 'gps-coordinate-popup',
         })
           .setLatLng(event.latlng)
-          .setContent(getGpsPopupContent(coordinate, t.diveMap.depthLoading, event.latlng))
+          .setContent(getGpsPopupContent(coordinate, t.diveMap.depthLoading))
           .openOn(map)
 
         getDepthAtLatLng(event.latlng)
@@ -847,12 +692,12 @@
             const depthContent = depthMeters === null ? t.diveMap.depthUnavailable : formatDepth(depthMeters)
 
             if (map.hasLayer(popup)) {
-              popup.setContent(getGpsPopupContent(coordinate, depthContent, event.latlng))
+              popup.setContent(getGpsPopupContent(coordinate, depthContent))
             }
           })
           .catch(() => {
             if (map.hasLayer(popup)) {
-              popup.setContent(getGpsPopupContent(coordinate, t.diveMap.depthUnavailable, event.latlng))
+              popup.setContent(getGpsPopupContent(coordinate, t.diveMap.depthUnavailable))
             }
           })
       })
@@ -879,11 +724,9 @@
           { OpenStreetMap: osmLayer },
           {
             [t.diveMap.depthLayer]: dnrBathymetryLayer,
+            [t.diveMap.noaaLayer]: noaaLayer,
             [t.diveMap.depthTrace]: depthTraceLayer,
             [t.diveMap.deadReckoningPois]: deadReckoningPoisLayer,
-            [t.diveMap.triangulatedPois]: triangulatedPoisLayer,
-            [t.diveMap.observationPoints]: observationPointsLayer,
-            [t.diveMap.noaaLayer]: noaaLayer,
           },
           {
             collapsed: layerControlCollapsed,
@@ -1065,6 +908,10 @@
     filter: saturate(1.12) contrast(1.08);
   }
 
+  .sunnyside-map :global(.noaa-chart-tile) {
+    opacity: 0.92;
+  }
+
   .sunnyside-map :global(.leaflet-control-layers),
   .sunnyside-map :global(.leaflet-control-zoom a),
   .sunnyside-map :global(.sunnyside-recenter-button),
@@ -1147,16 +994,14 @@
 
   .sunnyside-map :global(.gps-coordinate-popup-content) {
     display: grid;
-    gap: 0.5rem;
-    min-width: 15rem;
+    gap: 0.7rem;
+    min-width: 14.5rem;
     padding: 0.85rem 1rem;
   }
 
   .sunnyside-map :global(.gps-coordinate-popup-row) {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: baseline;
-    column-gap: 1rem;
+    gap: 0.16rem;
   }
 
   .sunnyside-map :global(.gps-coordinate-popup-content span) {
@@ -1173,6 +1018,7 @@
     font-size: 0.92rem;
     font-weight: 800;
     letter-spacing: 0;
+    white-space: nowrap;
   }
 
   .sunnyside-map :global(.depth-trace-label) {
@@ -1197,29 +1043,29 @@
 
   .sunnyside-map :global(.dead-reckoning-poi-icon) {
     display: grid;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 1.52rem;
+    height: 1.52rem;
     place-items: center;
     border: 0;
     border-radius: 999px;
     background: color-mix(in srgb, var(--poi-fill, #d6e1dd) 84%, white);
-    box-shadow: 0 10px 22px rgb(16 32 30 / 0.2);
+    box-shadow: none;
     color: #10201e;
     transition:
       background-color 220ms ease,
-      transform 160ms ease,
-      box-shadow 160ms ease;
+      transform 160ms ease;
   }
 
   .sunnyside-map :global(.dead-reckoning-poi-marker:hover .dead-reckoning-poi-icon),
   .sunnyside-map :global(.dead-reckoning-poi-marker:focus-visible .dead-reckoning-poi-icon) {
-    box-shadow: 0 14px 28px rgb(16 32 30 / 0.26);
     transform: translateY(-1px) scale(1.05);
   }
 
   .sunnyside-map :global(.dead-reckoning-poi-icon svg) {
-    width: 1.85rem;
-    height: 1.85rem;
+    display: block;
+    width: 1.34rem;
+    height: 1.34rem;
+    margin: auto;
   }
 
   .sunnyside-map :global(.dead-reckoning-poi-label) {
@@ -1272,127 +1118,6 @@
   }
 
   .sunnyside-map :global(.dead-reckoning-poi-popup-content dd) {
-    margin: 0;
-    color: var(--color-text-primary);
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-
-  .sunnyside-map :global(.triangulated-poi-circle) {
-    filter: drop-shadow(0 6px 14px rgb(16 32 30 / 0.2));
-  }
-
-  .sunnyside-map :global(.triangulated-poi-label) {
-    border: 1px solid rgb(13 124 134 / 0.18);
-    background: rgb(248 250 247 / 0.88);
-    box-shadow: 0 8px 22px rgb(16 32 30 / 0.1);
-    color: var(--color-text-primary);
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-  }
-
-  .sunnyside-map :global(.triangulated-poi-label::before) {
-    border-top-color: rgb(248 250 247 / 0.88);
-  }
-
-  .sunnyside-map :global(.triangulated-poi-popup .leaflet-popup-content) {
-    margin: 0;
-  }
-
-  .sunnyside-map :global(.triangulated-poi-popup-content) {
-    display: grid;
-    gap: 0.65rem;
-    min-width: 14rem;
-    padding: 0.9rem 1rem;
-  }
-
-  .sunnyside-map :global(.triangulated-poi-popup-content > strong) {
-    color: var(--color-text-primary);
-    font-size: 1rem;
-  }
-
-  .sunnyside-map :global(.triangulated-poi-popup-content dl) {
-    display: grid;
-    gap: 0.42rem;
-    margin: 0;
-  }
-
-  .sunnyside-map :global(.triangulated-poi-popup-content div) {
-    display: grid;
-    gap: 0.08rem;
-  }
-
-  .sunnyside-map :global(.triangulated-poi-popup-content dt) {
-    color: var(--color-text-secondary);
-    font-size: 0.66rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .sunnyside-map :global(.triangulated-poi-popup-content dd) {
-    margin: 0;
-    color: var(--color-text-primary);
-    font-size: 0.86rem;
-    font-weight: 700;
-  }
-
-  .sunnyside-map :global(.observation-point-marker) {
-    filter: drop-shadow(0 6px 14px rgb(16 32 30 / 0.22));
-  }
-
-  .sunnyside-map :global(.observation-point-label) {
-    border: 1px solid rgb(16 32 30 / 0.18);
-    background: rgb(248 250 247 / 0.9);
-    box-shadow: 0 8px 22px rgb(16 32 30 / 0.1);
-    color: var(--color-text-primary);
-    font-size: 0.68rem;
-    font-weight: 900;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .sunnyside-map :global(.observation-point-label::before) {
-    border-top-color: rgb(248 250 247 / 0.9);
-  }
-
-  .sunnyside-map :global(.observation-point-popup .leaflet-popup-content) {
-    margin: 0;
-  }
-
-  .sunnyside-map :global(.observation-point-popup-content) {
-    display: grid;
-    gap: 0.65rem;
-    min-width: 13rem;
-    padding: 0.9rem 1rem;
-  }
-
-  .sunnyside-map :global(.observation-point-popup-content > strong) {
-    color: var(--color-text-primary);
-    font-size: 1rem;
-  }
-
-  .sunnyside-map :global(.observation-point-popup-content dl) {
-    display: grid;
-    gap: 0.42rem;
-    margin: 0;
-  }
-
-  .sunnyside-map :global(.observation-point-popup-content div) {
-    display: grid;
-    gap: 0.08rem;
-  }
-
-  .sunnyside-map :global(.observation-point-popup-content dt) {
-    color: var(--color-text-secondary);
-    font-size: 0.66rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .sunnyside-map :global(.observation-point-popup-content dd) {
     margin: 0;
     color: var(--color-text-primary);
     font-size: 0.86rem;

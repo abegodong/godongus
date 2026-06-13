@@ -2,8 +2,6 @@ import { handleContactRequest, json } from './functions/lib/contact.js'
 
 const deadReckoningPoisCsvUrl =
   'https://docs.google.com/spreadsheets/d/1bwaJZiFD1QsQ5QXfdTSbTdl8w-dLYUfIb04nQcGkJ3c/gviz/tq?tqx=out:csv&gid=1827903938'
-const triangulatedPoisCsvUrl =
-  'https://docs.google.com/spreadsheets/d/1bwaJZiFD1QsQ5QXfdTSbTdl8w-dLYUfIb04nQcGkJ3c/gviz/tq?tqx=out:csv&gid=2021580753'
 
 export default {
   async fetch(request, env) {
@@ -46,29 +44,6 @@ export default {
 
       if (!response.ok) {
         return json({ error: 'Unable to load Dead Reckoning POIs.' }, 502)
-      }
-
-      return new Response(await response.text(), {
-        headers: {
-          'content-type': 'text/csv; charset=utf-8',
-          'cache-control': 'no-store',
-        },
-      })
-    }
-
-    if (url.pathname === '/api/triangulated-pois') {
-      if (request.method !== 'GET') {
-        return json({ error: 'Method not allowed.' }, 405)
-      }
-
-      const response = await fetch(triangulatedPoisCsvUrl, {
-        headers: {
-          Accept: 'text/csv,text/plain;q=0.9,*/*;q=0.8',
-        },
-      })
-
-      if (!response.ok) {
-        return json({ error: 'Unable to load Triangulated POIs.' }, 502)
       }
 
       return new Response(await response.text(), {
