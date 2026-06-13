@@ -96,6 +96,7 @@
         openFullMap: 'Open full map',
         backToMapPage: 'Back to map page',
         recenter: 'Recenter map',
+        gpsCoordinate: 'GPS coordinate',
       },
       error: {
         label: 'Error',
@@ -264,6 +265,7 @@
         openFullMap: 'Buka peta penuh',
         backToMapPage: 'Kembali ke halaman peta',
         recenter: 'Pusatkan ulang peta',
+        gpsCoordinate: 'Koordinat GPS',
       },
       error: {
         label: 'Error',
@@ -432,6 +434,7 @@
         openFullMap: 'Abrir mapa completo',
         backToMapPage: 'Volver a la página del mapa',
         recenter: 'Volver a centrar el mapa',
+        gpsCoordinate: 'Coordenada GPS',
       },
       error: {
         label: 'Error',

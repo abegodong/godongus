@@ -54,6 +54,8 @@
     return '#1e3a8a'
   }
 
+  const formatCoordinate = ({ lat, lng }) => `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+
   const createNoaaChartLayer = (L) =>
     L.GridLayer.extend({
       createTile(coords, done) {
@@ -229,6 +231,23 @@
         layers: [osmLayer, dnrBathymetryLayer, depthTraceLayer],
         scrollWheelZoom: true,
         zoomControl: !fullSize,
+      })
+
+      map.on('click', (event) => {
+        const coordinate = formatCoordinate(event.latlng)
+
+        L.popup({
+          closeButton: true,
+          className: 'gps-coordinate-popup',
+        })
+          .setLatLng(event.latlng)
+          .setContent(`
+            <div class="gps-coordinate-popup-content">
+              <span>${t.diveMap.gpsCoordinate}</span>
+              <strong>${coordinate}</strong>
+            </div>
+          `)
+          .openOn(map)
       })
 
       if (fullSize) {
@@ -510,6 +529,33 @@
     margin: 0.85rem 1rem;
     color: var(--color-text-primary);
     font-weight: 700;
+  }
+
+  .sunnyside-map :global(.gps-coordinate-popup .leaflet-popup-content) {
+    margin: 0;
+  }
+
+  .sunnyside-map :global(.gps-coordinate-popup-content) {
+    display: grid;
+    gap: 0.28rem;
+    min-width: 12rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .sunnyside-map :global(.gps-coordinate-popup-content span) {
+    color: var(--color-text-secondary);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sunnyside-map :global(.gps-coordinate-popup-content strong) {
+    color: var(--color-text-primary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0;
   }
 
   .sunnyside-map :global(.depth-trace-label) {
