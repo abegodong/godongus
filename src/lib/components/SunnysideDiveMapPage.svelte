@@ -12,6 +12,8 @@
     'https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/NOAAChartDisplay/MapServer/exts/MaritimeChartService/MapServer/export'
   const dnrBathymetryExportUrl =
     'https://gis.dnr.wa.gov/image/rest/services/Aquatics/WA_bathymetry_CoNED_MLLW/ImageServer/exportImage'
+  const dnrBathymetrySamplesUrl =
+    'https://gis.dnr.wa.gov/image/rest/services/Aquatics/WA_bathymetry_CoNED_MLLW/ImageServer/getSamples'
   const dnrBathymetryRenderingRule = JSON.stringify({ rasterFunction: 'bathy_top50m' })
   const tileSize = 256
   const earthRadius = 6378137
@@ -26,6 +28,7 @@
     { lat: 47.1797953, lng: -122.5944091, depthMeters: 29.6 },
   ]
   const labeledDepthSampleIndexes = new Set([0, 1, 3, 5, 6])
+  const deadReckoningPoisEndpoint = '/api/dead-reckoning-pois'
 
   let mapElement
   let map
@@ -55,6 +58,238 @@
   }
 
   const formatCoordinate = ({ lat, lng }) => `${lat.toFixed(6)}, ${lng.toFixed(6)}`
+
+  const parseCsv = (csv) => {
+    const rows = []
+    let row = []
+    let value = ''
+    let insideQuotes = false
+
+    for (let index = 0; index < csv.length; index += 1) {
+      const character = csv[index]
+      const nextCharacter = csv[index + 1]
+
+      if (character === '"') {
+        if (insideQuotes && nextCharacter === '"') {
+          value += '"'
+          index += 1
+        } else {
+          insideQuotes = !insideQuotes
+        }
+      } else if (character === ',' && !insideQuotes) {
+        row.push(value.trim())
+        value = ''
+      } else if ((character === '\n' || character === '\r') && !insideQuotes) {
+        if (character === '\r' && nextCharacter === '\n') {
+          index += 1
+        }
+
+        row.push(value.trim())
+        if (row.some((cell) => cell.length > 0)) {
+          rows.push(row)
+        }
+        row = []
+        value = ''
+      } else {
+        value += character
+      }
+    }
+
+    row.push(value.trim())
+    if (row.some((cell) => cell.length > 0)) {
+      rows.push(row)
+    }
+
+    return rows
+  }
+
+  const parseCoordinate = (coordinate) => {
+    const [latValue, lngValue] = coordinate.split(',').map((part) => Number(part.trim()))
+
+    if (!Number.isFinite(latValue) || !Number.isFinite(lngValue)) {
+      return null
+    }
+
+    return { lat: latValue, lng: lngValue }
+  }
+
+  const parseOptionalNumber = (value) => {
+    const parsed = Number(String(value || '').trim())
+
+    return Number.isFinite(parsed) ? parsed : null
+  }
+
+  const loadDeadReckoningPois = async () => {
+    const response = await fetch(deadReckoningPoisEndpoint, { cache: 'no-store' })
+
+    if (!response.ok) {
+      throw new Error('Dead Reckoning POI sheet request failed')
+    }
+
+    const rows = parseCsv(await response.text())
+
+    return rows
+      .slice(1)
+      .map((row) => {
+        const coordinate = parseCoordinate(row[10] || '')
+
+        if (!coordinate || !row[1]) {
+          return null
+        }
+
+        return {
+          id: row[0] || '',
+          name: row[1],
+          fromPoint: row[2] || '',
+          bearing: parseOptionalNumber(row[3]),
+          kickCycles: parseOptionalNumber(row[4]),
+          distanceMeters: parseOptionalNumber(row[5]),
+          sheetDepthFeet: parseOptionalNumber(row[8]),
+          notes: row[9] || '',
+          lat: coordinate.lat,
+          lng: coordinate.lng,
+        }
+      })
+      .filter(Boolean)
+  }
+
+  const formatSheetDepth = (depthFeet) => {
+    if (!Number.isFinite(depthFeet)) {
+      return t.diveMap.depthUnavailable
+    }
+
+    return `${depthFeet} ft / ${Math.round(depthFeet / 3.28084)} m`
+  }
+
+  const formatDepthComparison = (sheetDepthFeet, dnrDepthMeters) => {
+    if (!Number.isFinite(sheetDepthFeet) || !Number.isFinite(dnrDepthMeters)) {
+      return t.diveMap.depthUnavailable
+    }
+
+    const dnrDepthFeet = dnrDepthMeters * 3.28084
+    const difference = Math.round(dnrDepthFeet - sheetDepthFeet)
+
+    if (Math.abs(difference) < 1) {
+      return 'Sheet and DNR are within 1 ft'
+    }
+
+    return `DNR is ${Math.abs(difference)} ft ${difference > 0 ? 'deeper' : 'shallower'}`
+  }
+
+  const latLngToWebMercator = ({ lat, lng }) => {
+    const boundedLat = Math.max(Math.min(lat, 85.05112878), -85.05112878)
+
+    return {
+      x: earthRadius * (lng * Math.PI / 180),
+      y: earthRadius * Math.log(Math.tan(Math.PI / 4 + (boundedLat * Math.PI / 180) / 2)),
+    }
+  }
+
+  const getDepthAtLatLng = async (latlng) => {
+    const point = latLngToWebMercator(latlng)
+    const params = new URLSearchParams({
+      geometry: JSON.stringify({
+        x: point.x,
+        y: point.y,
+        spatialReference: { wkid: 3857 },
+      }),
+      geometryType: 'esriGeometryPoint',
+      sampleDistance: '10',
+      returnFirstValueOnly: 'false',
+      f: 'json',
+    })
+    const response = await fetch(`${dnrBathymetrySamplesUrl}?${params.toString()}`)
+
+    if (!response.ok) {
+      throw new Error('Depth sample request failed')
+    }
+
+    const payload = await response.json()
+    const value = Number(payload?.samples?.[0]?.value)
+
+    if (!Number.isFinite(value)) {
+      return null
+    }
+
+    return Math.max(0, Math.abs(value))
+  }
+
+  const getGpsPopupContent = (coordinate, depthContent) => `
+    <div class="gps-coordinate-popup-content">
+      <span>${t.diveMap.gpsCoordinate}</span>
+      <strong>${coordinate}</strong>
+      <span>${t.diveMap.depth}</span>
+      <strong>${depthContent}</strong>
+    </div>
+  `
+
+  const getDeadReckoningPoiPopupContent = (poi, dnrDepthMeters = undefined) => {
+    const dnrDepth =
+      dnrDepthMeters === undefined
+        ? t.diveMap.depthLoading
+        : dnrDepthMeters === null
+          ? t.diveMap.depthUnavailable
+          : formatDepth(dnrDepthMeters)
+    const sheetDepth = formatSheetDepth(poi.sheetDepthFeet)
+    const comparison =
+      dnrDepthMeters === undefined ? t.diveMap.depthLoading : formatDepthComparison(poi.sheetDepthFeet, dnrDepthMeters)
+
+    return `
+      <div class="dead-reckoning-poi-popup-content">
+        <strong>${poi.name}</strong>
+        <dl>
+          <div>
+            <dt>${t.diveMap.gpsCoordinate}</dt>
+            <dd>${formatCoordinate(poi)}</dd>
+          </div>
+          <div>
+            <dt>${t.diveMap.dnrDepth}</dt>
+            <dd>${dnrDepth}</dd>
+          </div>
+          <div>
+            <dt>${t.diveMap.sheetDepth}</dt>
+            <dd>${sheetDepth}</dd>
+          </div>
+          <div>
+            <dt>${t.diveMap.depthComparison}</dt>
+            <dd>${comparison}</dd>
+          </div>
+          ${
+            poi.fromPoint
+              ? `<div>
+                  <dt>${t.diveMap.fromPoint}</dt>
+                  <dd>${poi.fromPoint}</dd>
+                </div>`
+              : ''
+          }
+          ${
+            Number.isFinite(poi.distanceMeters)
+              ? `<div>
+                  <dt>${t.diveMap.distance}</dt>
+                  <dd>${poi.distanceMeters} m / ${Math.round(poi.distanceMeters * 3.28084)} ft</dd>
+                </div>`
+              : ''
+          }
+          ${
+            Number.isFinite(poi.kickCycles)
+              ? `<div>
+                  <dt>${t.diveMap.kickCycles}</dt>
+                  <dd>${poi.kickCycles}</dd>
+                </div>`
+              : ''
+          }
+          ${
+            poi.notes
+              ? `<div>
+                  <dt>${t.diveMap.notes}</dt>
+                  <dd>${poi.notes}</dd>
+                </div>`
+              : ''
+          }
+        </dl>
+      </div>
+    `
+  }
 
   const createNoaaChartLayer = (L) =>
     L.GridLayer.extend({
@@ -195,6 +430,55 @@
     return traceLayer
   }
 
+  const createDeadReckoningPoisLayer = (L) => {
+    const poisLayer = L.layerGroup()
+
+    loadDeadReckoningPois()
+      .then((pois) => {
+        pois.forEach((poi) => {
+          const marker = L.circleMarker([poi.lat, poi.lng], {
+            radius: 6,
+            weight: 2,
+            color: '#10201e',
+            fillColor: '#f6c85f',
+            fillOpacity: 0.95,
+            bubblingMouseEvents: false,
+            className: 'dead-reckoning-poi-marker',
+          })
+            .addTo(poisLayer)
+            .bindPopup(getDeadReckoningPoiPopupContent(poi), {
+              className: 'dead-reckoning-poi-popup',
+            })
+            .bindTooltip(poi.name, {
+              direction: 'top',
+              offset: [0, -4],
+              className: 'dead-reckoning-poi-label',
+            })
+
+          marker.on('popupopen', (event) => {
+            getDepthAtLatLng(poi)
+              .then((depthMeters) => {
+                event.popup.setContent(getDeadReckoningPoiPopupContent(poi, depthMeters))
+              })
+              .catch(() => {
+                event.popup.setContent(getDeadReckoningPoiPopupContent(poi, null))
+              })
+          })
+        })
+      })
+      .catch(() => {
+        L.popup({
+          closeButton: true,
+          className: 'dead-reckoning-poi-popup',
+        })
+          .setLatLng(sunnysideBeach)
+          .setContent(`<div class="dead-reckoning-poi-popup-content"><strong>${t.diveMap.poisUnavailable}</strong></div>`)
+          .addTo(poisLayer)
+      })
+
+    return poisLayer
+  }
+
   onMount(() => {
     let cancelled = false
 
@@ -221,6 +505,7 @@
         attribution: 'WA DNR / USGS CoNED',
       })
       const depthTraceLayer = createDepthTraceLayer(L)
+      const deadReckoningPoisLayer = createDeadReckoningPoisLayer(L)
       const layerControlCollapsed = window.matchMedia('(max-width: 720px)').matches
 
       map = L.map(mapElement, {
@@ -228,26 +513,34 @@
         zoom: 16,
         minZoom: 11,
         maxZoom: 19,
-        layers: [osmLayer, dnrBathymetryLayer, depthTraceLayer],
+        layers: [osmLayer, dnrBathymetryLayer, depthTraceLayer, deadReckoningPoisLayer],
         scrollWheelZoom: true,
         zoomControl: !fullSize,
       })
 
       map.on('click', (event) => {
         const coordinate = formatCoordinate(event.latlng)
-
-        L.popup({
+        const popup = L.popup({
           closeButton: true,
           className: 'gps-coordinate-popup',
         })
           .setLatLng(event.latlng)
-          .setContent(`
-            <div class="gps-coordinate-popup-content">
-              <span>${t.diveMap.gpsCoordinate}</span>
-              <strong>${coordinate}</strong>
-            </div>
-          `)
+          .setContent(getGpsPopupContent(coordinate, t.diveMap.depthLoading))
           .openOn(map)
+
+        getDepthAtLatLng(event.latlng)
+          .then((depthMeters) => {
+            const depthContent = depthMeters === null ? t.diveMap.depthUnavailable : formatDepth(depthMeters)
+
+            if (map.hasLayer(popup)) {
+              popup.setContent(getGpsPopupContent(coordinate, depthContent))
+            }
+          })
+          .catch(() => {
+            if (map.hasLayer(popup)) {
+              popup.setContent(getGpsPopupContent(coordinate, t.diveMap.depthUnavailable))
+            }
+          })
       })
 
       if (fullSize) {
@@ -273,6 +566,7 @@
           {
             [t.diveMap.depthLayer]: dnrBathymetryLayer,
             [t.diveMap.depthTrace]: depthTraceLayer,
+            [t.diveMap.deadReckoningPois]: deadReckoningPoisLayer,
             [t.diveMap.noaaLayer]: noaaLayer,
           },
           {
@@ -571,6 +865,62 @@
 
   .sunnyside-map :global(.depth-trace-label::before) {
     border-top-color: rgb(248 250 247 / 0.9);
+  }
+
+  .sunnyside-map :global(.dead-reckoning-poi-label) {
+    border: 1px solid rgb(16 32 30 / 0.14);
+    background: rgb(248 250 247 / 0.88);
+    box-shadow: 0 8px 22px rgb(16 32 30 / 0.1);
+    color: var(--color-text-primary);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .sunnyside-map :global(.dead-reckoning-poi-label::before) {
+    border-top-color: rgb(248 250 247 / 0.88);
+  }
+
+  .sunnyside-map :global(.dead-reckoning-poi-popup .leaflet-popup-content) {
+    margin: 0;
+  }
+
+  .sunnyside-map :global(.dead-reckoning-poi-popup-content) {
+    display: grid;
+    gap: 0.65rem;
+    min-width: 14rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .sunnyside-map :global(.dead-reckoning-poi-popup-content > strong) {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+  }
+
+  .sunnyside-map :global(.dead-reckoning-poi-popup-content dl) {
+    display: grid;
+    gap: 0.42rem;
+    margin: 0;
+  }
+
+  .sunnyside-map :global(.dead-reckoning-poi-popup-content div) {
+    display: grid;
+    gap: 0.08rem;
+  }
+
+  .sunnyside-map :global(.dead-reckoning-poi-popup-content dt) {
+    color: var(--color-text-secondary);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sunnyside-map :global(.dead-reckoning-poi-popup-content dd) {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 0.86rem;
+    font-weight: 700;
   }
 
   @keyframes map-reveal {
