@@ -176,6 +176,29 @@
     return `DNR is ${Math.abs(difference)} ft ${difference > 0 ? 'deeper' : 'shallower'}`
   }
 
+  const getDepthDifferenceFeet = (sheetDepthFeet, dnrDepthMeters) => {
+    if (!Number.isFinite(sheetDepthFeet) || !Number.isFinite(dnrDepthMeters)) {
+      return null
+    }
+
+    return Math.abs(dnrDepthMeters * 3.28084 - sheetDepthFeet)
+  }
+
+  const getDepthMatchColor = (differenceFeet) => {
+    if (!Number.isFinite(differenceFeet)) return '#d6e1dd'
+    if (differenceFeet <= 3) return '#22c55e'
+    if (differenceFeet <= 7) return '#14b8a6'
+    if (differenceFeet <= 12) return '#f6c85f'
+    if (differenceFeet <= 20) return '#f97316'
+    return '#dc2626'
+  }
+
+  const getDepthMatchStrokeColor = (differenceFeet) => {
+    if (!Number.isFinite(differenceFeet)) return 'rgb(16 32 30 / 0.56)'
+    if (differenceFeet <= 12) return '#10201e'
+    return '#7f1d1d'
+  }
+
   const latLngToWebMercator = ({ lat, lng }) => {
     const boundedLat = Math.max(Math.min(lat, 85.05112878), -85.05112878)
 
@@ -439,9 +462,9 @@
           const marker = L.circleMarker([poi.lat, poi.lng], {
             radius: 6,
             weight: 2,
-            color: '#10201e',
-            fillColor: '#f6c85f',
-            fillOpacity: 0.95,
+            color: getDepthMatchStrokeColor(null),
+            fillColor: getDepthMatchColor(null),
+            fillOpacity: 0.9,
             bubblingMouseEvents: false,
             className: 'dead-reckoning-poi-marker',
           })
@@ -458,12 +481,36 @@
           marker.on('popupopen', (event) => {
             getDepthAtLatLng(poi)
               .then((depthMeters) => {
+                const differenceFeet = getDepthDifferenceFeet(poi.sheetDepthFeet, depthMeters)
+                marker.setStyle({
+                  color: getDepthMatchStrokeColor(differenceFeet),
+                  fillColor: getDepthMatchColor(differenceFeet),
+                  fillOpacity: 0.95,
+                })
                 event.popup.setContent(getDeadReckoningPoiPopupContent(poi, depthMeters))
               })
               .catch(() => {
                 event.popup.setContent(getDeadReckoningPoiPopupContent(poi, null))
               })
           })
+
+          getDepthAtLatLng(poi)
+            .then((depthMeters) => {
+              const differenceFeet = getDepthDifferenceFeet(poi.sheetDepthFeet, depthMeters)
+
+              marker.setStyle({
+                color: getDepthMatchStrokeColor(differenceFeet),
+                fillColor: getDepthMatchColor(differenceFeet),
+                fillOpacity: 0.95,
+              })
+            })
+            .catch(() => {
+              marker.setStyle({
+                color: getDepthMatchStrokeColor(null),
+                fillColor: getDepthMatchColor(null),
+                fillOpacity: 0.72,
+              })
+            })
         })
       })
       .catch(() => {
