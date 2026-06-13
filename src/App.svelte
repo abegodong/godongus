@@ -87,8 +87,8 @@
         layerNote:
           'Use the layer control to compare the street map, DNR/USGS depth shading, and NOAA chart detail. Treat this as a planning reference, not a substitute for local conditions, training, or a dive briefing.',
         depthLayer: 'DNR/USGS depth shading',
-        depthTrace: 'Depth trace',
-        depthTraceSummary: 'Trace: shore edge to about 32 m / 105 ft',
+        depthTrace: 'Pipeline depth trace',
+        depthTraceSummary: 'Pipeline trace: shore edge to about 30 m / 97 ft',
         noaaLayer: 'NOAA chart overlay',
         marker: 'Sunnyside Beach dive area',
         mapLabel: 'Interactive map of Sunnyside Beach with NOAA chart overlay',
@@ -255,8 +255,8 @@
         layerNote:
           'Gunakan kontrol layer untuk membandingkan peta jalan, bayangan kedalaman DNR/USGS, dan detail chart NOAA. Anggap ini sebagai referensi perencanaan, bukan pengganti kondisi lokal, pelatihan, atau briefing penyelaman.',
         depthLayer: 'Bayangan kedalaman DNR/USGS',
-        depthTrace: 'Jejak kedalaman',
-        depthTraceSummary: 'Jejak: tepi pantai hingga sekitar 32 m / 105 kaki',
+        depthTrace: 'Jejak kedalaman pipa',
+        depthTraceSummary: 'Jejak pipa: tepi pantai hingga sekitar 30 m / 97 kaki',
         noaaLayer: 'Overlay chart NOAA',
         marker: 'Area selam Sunnyside Beach',
         mapLabel: 'Peta interaktif Sunnyside Beach dengan overlay chart NOAA',
@@ -423,8 +423,8 @@
         layerNote:
           'Usa el control de capas para comparar el mapa de calles, el sombreado de profundidad DNR/USGS y el detalle náutico de NOAA. Trátalo como referencia de planificación, no como reemplazo de condiciones locales, entrenamiento o briefing de buceo.',
         depthLayer: 'Sombreado de profundidad DNR/USGS',
-        depthTrace: 'Trazo de profundidad',
-        depthTraceSummary: 'Trazo: borde de la costa hasta aprox. 32 m / 105 pies',
+        depthTrace: 'Trazo de profundidad de tubería',
+        depthTraceSummary: 'Trazo de tubería: borde de la costa hasta aprox. 30 m / 97 pies',
         noaaLayer: 'Capa náutica NOAA',
         marker: 'Área de buceo de Sunnyside Beach',
         mapLabel: 'Mapa interactivo de Sunnyside Beach con capa náutica NOAA',

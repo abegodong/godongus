@@ -17,17 +17,15 @@
   const earthRadius = 6378137
   const originShift = Math.PI * earthRadius
   const depthTraceSamples = [
-    { lat: 47.17875, lng: -122.5902, depthMeters: 0 },
-    { lat: 47.1788375, lng: -122.59095, depthMeters: 8.8 },
-    { lat: 47.178925, lng: -122.5917, depthMeters: 14.1 },
-    { lat: 47.1790125, lng: -122.59245, depthMeters: 17.4 },
-    { lat: 47.1791, lng: -122.5932, depthMeters: 20.6 },
-    { lat: 47.1791875, lng: -122.59395, depthMeters: 24.2 },
-    { lat: 47.179275, lng: -122.5947, depthMeters: 27.1 },
-    { lat: 47.1793625, lng: -122.59545, depthMeters: 29.3 },
-    { lat: 47.17945, lng: -122.5962, depthMeters: 32 },
+    { lat: 47.1781326, lng: -122.5905681, depthMeters: 0.8 },
+    { lat: 47.1781326, lng: -122.5915123, depthMeters: 6.4 },
+    { lat: 47.1784826, lng: -122.5922418, depthMeters: 13 },
+    { lat: 47.1789348, lng: -122.5929285, depthMeters: 18.5 },
+    { lat: 47.1792556, lng: -122.5935078, depthMeters: 23.2 },
+    { lat: 47.1796057, lng: -122.5940014, depthMeters: 27.1 },
+    { lat: 47.1797953, lng: -122.5944091, depthMeters: 29.6 },
   ]
-  const labeledDepthSampleIndexes = new Set([0, 1, 3, 5, 8])
+  const labeledDepthSampleIndexes = new Set([0, 1, 3, 5, 6])
 
   let mapElement
   let map
@@ -137,6 +135,16 @@
 
   const createDepthTraceLayer = (L) => {
     const traceLayer = L.layerGroup()
+    const traceLatLngs = depthTraceSamples.map((sample) => [sample.lat, sample.lng])
+
+    L.polyline(traceLatLngs, {
+      color: '#10201e',
+      weight: 8,
+      opacity: 0.62,
+      dashArray: '7 9',
+      lineCap: 'round',
+      lineJoin: 'round',
+    }).addTo(traceLayer)
 
     depthTraceSamples.slice(1).forEach((sample, index) => {
       const previousSample = depthTraceSamples[index]
@@ -149,7 +157,7 @@
         ],
         {
           color: getTraceColor(averageDepth),
-          weight: 5,
+          weight: 4,
           opacity: 0.95,
           lineCap: 'round',
           lineJoin: 'round',
