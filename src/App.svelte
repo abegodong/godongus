@@ -78,18 +78,18 @@
         emptyState: 'Dive entries will appear here as the archive grows.',
       },
       diveMap: {
-        eyebrow: 'Dive map',
+        eyebrow: 'Dive Site Map',
         title: 'Sunnyside Dive Map.',
+        fullTitle: 'Sunnyside Dive Site Map',
         intro:
-          'An interactive starting point for exploring Sunnyside Beach in Steilacoom, with OpenStreetMap as the base layer and NOAA chart detail over the water.',
+          'An interactive guide to Sunnyside Beach in Steilacoom, Washington, a Puget Sound shore dive with an easy beach entry, pipeline navigation, artificial reef POIs, and depth shading to help you understand how the site drops away from shore.',
         locationLabel: 'Centered on',
         location: 'Sunnyside Beach, Steilacoom, Washington',
         layerNote:
           'Use the layer control to compare the street map, DNR/USGS depth shading, and NOAA chart detail. Treat this as a planning reference, not a substitute for local conditions, training, or a dive briefing.',
         depthLayer: 'DNR/USGS depth shading',
-        depthTrace: 'Pipeline depth trace',
-        depthTraceSummary: 'Pipeline trace: shore edge to about 97 ft / 30 m',
-        deadReckoningPois: 'POIs',
+        depthContours: 'Depth contour lines',
+        deadReckoningPois: 'Point of interests',
         noaaLayer: 'NOAA chart overlay',
         marker: 'Sunnyside Beach dive area',
         mapLabel: 'Interactive map of Sunnyside Beach with NOAA chart overlay',
@@ -100,6 +100,7 @@
         gpsCoordinate: 'GPS coordinate',
         bearing: 'Bearing',
         depth: 'Depth',
+        elevation: 'Elevation',
         dnrDepth: 'DNR/USGS depth',
         sheetDepth: 'Sheet depth',
         depthComparison: 'Depth comparison',
@@ -167,13 +168,13 @@
           '/sunnyside-dive-map': {
             title: 'Sunnyside Dive Map | Abraham Godong',
             description:
-              'An interactive Sunnyside Beach dive map for Steilacoom, Washington, with OpenStreetMap and NOAA chart overlay layers.',
+              'An interactive Sunnyside Beach dive map for Steilacoom, Washington, showing beach entry context, pipeline navigation, artificial reef POIs, NOAA chart detail, and DNR/USGS depth shading.',
             robots: 'index, follow',
           },
           '/sunnyside-dive-map/full': {
             title: 'Full Screen Sunnyside Dive Map | Abraham Godong',
             description:
-              'Full screen interactive dive map for Sunnyside Beach in Steilacoom, Washington, with OpenStreetMap and NOAA chart overlay layers.',
+              'Full screen interactive dive map for Sunnyside Beach in Steilacoom, Washington, with pipeline navigation, artificial reef POIs, NOAA chart detail, and DNR/USGS depth shading.',
             robots: 'index, follow',
           },
           '/style-guide': {
@@ -261,17 +262,17 @@
         emptyState: 'Catatan penyelaman akan muncul di sini saat arsip bertambah.',
       },
       diveMap: {
-        eyebrow: 'Peta selam',
+        eyebrow: 'Peta Lokasi Selam',
         title: 'Peta Selam Sunnyside.',
+        fullTitle: 'Peta Lokasi Selam Sunnyside',
         intro:
-          'Titik awal interaktif untuk menjelajahi Sunnyside Beach di Steilacoom, dengan OpenStreetMap sebagai peta dasar dan detail chart NOAA di area air.',
+          'Panduan interaktif untuk Sunnyside Beach di Steilacoom, Washington, lokasi selam pantai Puget Sound dengan akses pantai yang mudah, navigasi pipa, POI terumbu buatan, dan gradasi kedalaman untuk memahami kontur dari tepi pantai.',
         locationLabel: 'Berpusat di',
         location: 'Sunnyside Beach, Steilacoom, Washington',
         layerNote:
           'Gunakan kontrol layer untuk membandingkan peta jalan, bayangan kedalaman DNR/USGS, dan detail chart NOAA. Anggap ini sebagai referensi perencanaan, bukan pengganti kondisi lokal, pelatihan, atau briefing penyelaman.',
         depthLayer: 'Bayangan kedalaman DNR/USGS',
-        depthTrace: 'Jejak kedalaman pipa',
-        depthTraceSummary: 'Jejak pipa: tepi pantai hingga sekitar 97 kaki / 30 m',
+        depthContours: 'Garis kontur kedalaman',
         deadReckoningPois: 'POI',
         noaaLayer: 'Overlay chart NOAA',
         marker: 'Area selam Sunnyside Beach',
@@ -283,6 +284,7 @@
         gpsCoordinate: 'Koordinat GPS',
         bearing: 'Bearing',
         depth: 'Kedalaman',
+        elevation: 'Elevasi',
         dnrDepth: 'Kedalaman DNR/USGS',
         sheetDepth: 'Kedalaman di sheet',
         depthComparison: 'Perbandingan kedalaman',
@@ -350,13 +352,13 @@
           '/sunnyside-dive-map': {
             title: 'Peta Selam Sunnyside | Abraham Godong',
             description:
-              'Peta selam interaktif Sunnyside Beach di Steilacoom, Washington, dengan layer OpenStreetMap dan chart NOAA.',
+              'Peta selam interaktif Sunnyside Beach di Steilacoom, Washington, dengan konteks akses pantai, navigasi pipa, POI terumbu buatan, detail chart NOAA, dan gradasi kedalaman DNR/USGS.',
             robots: 'index, follow',
           },
           '/sunnyside-dive-map/full': {
             title: 'Peta Selam Sunnyside Layar Penuh | Abraham Godong',
             description:
-              'Peta selam layar penuh untuk Sunnyside Beach di Steilacoom, Washington, dengan layer OpenStreetMap dan chart NOAA.',
+              'Peta selam layar penuh untuk Sunnyside Beach di Steilacoom, Washington, dengan navigasi pipa, POI terumbu buatan, detail chart NOAA, dan gradasi kedalaman DNR/USGS.',
             robots: 'index, follow',
           },
           '/style-guide': {
@@ -444,17 +446,17 @@
         emptyState: 'Las entradas de buceo aparecerán aquí a medida que crezca el archivo.',
       },
       diveMap: {
-        eyebrow: 'Mapa de buceo',
+        eyebrow: 'Mapa del Sitio de Buceo',
         title: 'Mapa de Buceo Sunnyside.',
+        fullTitle: 'Mapa del Sitio de Buceo Sunnyside',
         intro:
-          'Un punto de partida interactivo para explorar Sunnyside Beach en Steilacoom, con OpenStreetMap como capa base y detalle náutico de NOAA sobre el agua.',
+          'Una guía interactiva de Sunnyside Beach en Steilacoom, Washington, una inmersión de costa en Puget Sound con entrada desde la playa, navegación por tubería, POI de arrecife artificial y sombreado de profundidad para entender cómo el sitio cae desde la orilla.',
         locationLabel: 'Centrado en',
         location: 'Sunnyside Beach, Steilacoom, Washington',
         layerNote:
           'Usa el control de capas para comparar el mapa de calles, el sombreado de profundidad DNR/USGS y el detalle náutico de NOAA. Trátalo como referencia de planificación, no como reemplazo de condiciones locales, entrenamiento o briefing de buceo.',
         depthLayer: 'Sombreado de profundidad DNR/USGS',
-        depthTrace: 'Trazo de profundidad de tubería',
-        depthTraceSummary: 'Trazo de tubería: borde de la costa hasta aprox. 97 pies / 30 m',
+        depthContours: 'Líneas de contorno de profundidad',
         deadReckoningPois: 'POI',
         noaaLayer: 'Capa náutica NOAA',
         marker: 'Área de buceo de Sunnyside Beach',
@@ -466,6 +468,7 @@
         gpsCoordinate: 'Coordenada GPS',
         bearing: 'Rumbo',
         depth: 'Profundidad',
+        elevation: 'Elevación',
         dnrDepth: 'Profundidad DNR/USGS',
         sheetDepth: 'Profundidad de la hoja',
         depthComparison: 'Comparación de profundidad',
@@ -533,13 +536,13 @@
           '/sunnyside-dive-map': {
             title: 'Mapa de Buceo Sunnyside | Abraham Godong',
             description:
-              'Mapa interactivo de buceo para Sunnyside Beach en Steilacoom, Washington, con OpenStreetMap y capa náutica NOAA.',
+              'Mapa interactivo de buceo para Sunnyside Beach en Steilacoom, Washington, con contexto de entrada desde playa, navegación por tubería, POI de arrecife artificial, detalle náutico NOAA y sombreado de profundidad DNR/USGS.',
             robots: 'index, follow',
           },
           '/sunnyside-dive-map/full': {
             title: 'Mapa de Buceo Sunnyside en Pantalla Completa | Abraham Godong',
             description:
-              'Mapa interactivo en pantalla completa para Sunnyside Beach en Steilacoom, Washington, con OpenStreetMap y capa náutica NOAA.',
+              'Mapa interactivo en pantalla completa para Sunnyside Beach en Steilacoom, Washington, con navegación por tubería, POI de arrecife artificial, detalle náutico NOAA y sombreado de profundidad DNR/USGS.',
             robots: 'index, follow',
           },
           '/style-guide': {

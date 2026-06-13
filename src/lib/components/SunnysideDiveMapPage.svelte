@@ -18,17 +18,9 @@
   const tileSize = 256
   const earthRadius = 6378137
   const originShift = Math.PI * earthRadius
-  const depthTraceSamples = [
-    { lat: 47.1781326, lng: -122.5905681, depthMeters: 0.8 },
-    { lat: 47.1781326, lng: -122.5915123, depthMeters: 6.4 },
-    { lat: 47.1784826, lng: -122.5922418, depthMeters: 13 },
-    { lat: 47.1789348, lng: -122.5929285, depthMeters: 18.5 },
-    { lat: 47.1792556, lng: -122.5935078, depthMeters: 23.2 },
-    { lat: 47.1796057, lng: -122.5940014, depthMeters: 27.1 },
-    { lat: 47.1797953, lng: -122.5944091, depthMeters: 29.6 },
-  ]
-  const labeledDepthSampleIndexes = new Set([0, 1, 3, 5, 6])
   const deadReckoningPoisEndpoint = '/api/dead-reckoning-pois'
+  const depthContoursEndpoint = '/data/sunnyside-depth-contours.json'
+  const pipelineLabelReference = { lat: 47.1789348, lng: -122.5929285 }
 
   let mapElement
   let map
@@ -50,12 +42,7 @@
     return `${Math.round(depthMeters * 3.28084)} ft / ${Math.round(depthMeters)} m`
   }
 
-  const getTraceColor = (depthMeters) => {
-    if (depthMeters < 10) return '#14b8a6'
-    if (depthMeters < 20) return '#0d7c86'
-    if (depthMeters < 28) return '#2563eb'
-    return '#1e3a8a'
-  }
+  const formatElevation = (elevationMeters) => `${Math.round(elevationMeters * 3.28084)} ft / ${Math.round(elevationMeters)} m`
 
   const formatCoordinate = ({ lat, lng }) => `${lat.toFixed(6)}, ${lng.toFixed(6)}`
 
@@ -140,11 +127,7 @@
         return {
           id: row[0] || '',
           name: row[1],
-          bearing: parseOptionalNumber(row[3]),
-          kickCycles: parseOptionalNumber(row[4]),
-          distanceMeters: parseOptionalNumber(row[5]),
           sheetDepthFeet: parseOptionalNumber(row[8]),
-          notes: row[9] || '',
           lat: coordinate.lat,
           lng: coordinate.lng,
         }
@@ -152,27 +135,14 @@
       .filter(Boolean)
   }
 
-  const formatSheetDepth = (depthFeet) => {
-    if (!Number.isFinite(depthFeet)) {
-      return t.diveMap.depthUnavailable
+  const loadDepthContours = async () => {
+    const response = await fetch(depthContoursEndpoint, { cache: 'force-cache' })
+
+    if (!response.ok) {
+      throw new Error('Depth contour data request failed')
     }
 
-    return `${depthFeet} ft / ${Math.round(depthFeet / 3.28084)} m`
-  }
-
-  const formatDepthComparison = (sheetDepthFeet, dnrDepthMeters) => {
-    if (!Number.isFinite(sheetDepthFeet) || !Number.isFinite(dnrDepthMeters)) {
-      return t.diveMap.depthUnavailable
-    }
-
-    const dnrDepthFeet = dnrDepthMeters * 3.28084
-    const difference = Math.round(dnrDepthFeet - sheetDepthFeet)
-
-    if (Math.abs(difference) < 1) {
-      return 'Sheet and DNR are within 1 ft'
-    }
-
-    return `DNR is ${Math.abs(difference)} ft ${difference > 0 ? 'deeper' : 'shallower'}`
+    return response.json()
   }
 
   const getDepthDifferenceFeet = (sheetDepthFeet, dnrDepthMeters) => {
@@ -289,7 +259,7 @@
     }
   }
 
-  const getDepthAtLatLng = async (latlng) => {
+  const getDnrMeasurementAtLatLng = async (latlng) => {
     const point = latLngToWebMercator(latlng)
     const params = new URLSearchParams({
       geometry: JSON.stringify({
@@ -315,18 +285,43 @@
       return null
     }
 
-    return Math.max(0, Math.abs(value))
+    return value < 0
+      ? { type: 'depth', meters: Math.abs(value) }
+      : { type: 'elevation', meters: value }
   }
 
-  const getGpsPopupContent = (coordinate, depthContent) => `
+  const getDepthAtLatLng = async (latlng) => {
+    const measurement = await getDnrMeasurementAtLatLng(latlng)
+
+    return measurement?.type === 'depth' ? measurement.meters : null
+  }
+
+  const getClosestContourPointToPipeline = (line) => {
+    const projectedPipelineLabelReference = latLngToWebMercator(pipelineLabelReference)
+
+    return line.reduce(
+      (closestPoint, [lat, lng]) => {
+        const point = latLngToWebMercator({ lat, lng })
+        const distanceSquared =
+          (point.x - projectedPipelineLabelReference.x) ** 2 + (point.y - projectedPipelineLabelReference.y) ** 2
+
+        return distanceSquared < closestPoint.distanceSquared
+          ? { latLng: [lat, lng], distanceSquared }
+          : closestPoint
+      },
+      { latLng: null, distanceSquared: Number.POSITIVE_INFINITY },
+    )
+  }
+
+  const getGpsPopupContent = (coordinate, measurementContent, measurementLabel = t.diveMap.depth) => `
     <div class="gps-coordinate-popup-content">
       <div class="gps-coordinate-popup-row">
         <span>${t.diveMap.gpsCoordinate}</span>
         <strong>${coordinate}</strong>
       </div>
       <div class="gps-coordinate-popup-row">
-        <span>${t.diveMap.depth}</span>
-        <strong>${depthContent}</strong>
+        <span>${measurementLabel}</span>
+        <strong>${measurementContent}</strong>
       </div>
     </div>
   `
@@ -338,55 +333,18 @@
         : dnrDepthMeters === null
           ? t.diveMap.depthUnavailable
           : formatDepth(dnrDepthMeters)
-    const sheetDepth = formatSheetDepth(poi.sheetDepthFeet)
-    const comparison =
-      dnrDepthMeters === undefined ? t.diveMap.depthLoading : formatDepthComparison(poi.sheetDepthFeet, dnrDepthMeters)
 
     return `
-      <div class="dead-reckoning-poi-popup-content">
-        <strong>${escapeHtml(poi.name)}</strong>
-        <dl>
-          <div>
-            <dt>${t.diveMap.gpsCoordinate}</dt>
-            <dd>${escapeHtml(formatCoordinate(poi))}</dd>
-          </div>
-          <div>
-            <dt>${t.diveMap.dnrDepth}</dt>
-            <dd>${escapeHtml(dnrDepth)}</dd>
-          </div>
-          <div>
-            <dt>${t.diveMap.sheetDepth}</dt>
-            <dd>${escapeHtml(sheetDepth)}</dd>
-          </div>
-          <div>
-            <dt>${t.diveMap.depthComparison}</dt>
-            <dd>${escapeHtml(comparison)}</dd>
-          </div>
-          ${
-            Number.isFinite(poi.distanceMeters)
-              ? `<div>
-                  <dt>${t.diveMap.distance}</dt>
-                  <dd>${escapeHtml(`${poi.distanceMeters} m / ${Math.round(poi.distanceMeters * 3.28084)} ft`)}</dd>
-                </div>`
-              : ''
-          }
-          ${
-            Number.isFinite(poi.kickCycles)
-              ? `<div>
-                  <dt>${t.diveMap.kickCycles}</dt>
-                  <dd>${escapeHtml(poi.kickCycles)}</dd>
-                </div>`
-              : ''
-          }
-          ${
-            poi.notes
-              ? `<div>
-                  <dt>${t.diveMap.notes}</dt>
-                  <dd>${escapeHtml(poi.notes)}</dd>
-                </div>`
-              : ''
-          }
-        </dl>
+      <div class="gps-coordinate-popup-content dead-reckoning-poi-popup-content">
+        <strong class="dead-reckoning-poi-popup-title">${escapeHtml(poi.name)}</strong>
+        <div class="gps-coordinate-popup-row">
+          <span>${t.diveMap.gpsCoordinate}</span>
+          <strong>${escapeHtml(formatCoordinate(poi))}</strong>
+        </div>
+        <div class="gps-coordinate-popup-row">
+          <span>${t.diveMap.depth}</span>
+          <strong>${escapeHtml(dnrDepth)}</strong>
+        </div>
       </div>
     `
   }
@@ -479,6 +437,7 @@
         })
 
         tile.alt = ''
+        tile.className = 'dnr-bathymetry-tile'
         tile.decoding = 'async'
         tile.width = tileSize
         tile.height = tileSize
@@ -515,64 +474,49 @@
       },
     })
 
-  const createDepthTraceLayer = (L) => {
-    const traceLayer = L.layerGroup()
-    const traceLatLngs = depthTraceSamples.map((sample) => [sample.lat, sample.lng])
+  const createDepthContourLayer = (L) => {
+    const contourLayer = L.layerGroup()
 
-    L.polyline(traceLatLngs, {
-      color: '#10201e',
-      weight: 8,
-      opacity: 0.62,
-      dashArray: '7 9',
-      lineCap: 'round',
-      lineJoin: 'round',
-    }).addTo(traceLayer)
+    loadDepthContours()
+      .then((data) => {
+        data.contours.forEach((contour) => {
+          let labelPoint = { latLng: null, distanceSquared: Number.POSITIVE_INFINITY }
 
-    depthTraceSamples.slice(1).forEach((sample, index) => {
-      const previousSample = depthTraceSamples[index]
-      const averageDepth = (previousSample.depthMeters + sample.depthMeters) / 2
+          contour.lines.forEach((line) => {
+            if (line.length < 2) return
 
-      L.polyline(
-        [
-          [previousSample.lat, previousSample.lng],
-          [sample.lat, sample.lng],
-        ],
-        {
-          color: getTraceColor(averageDepth),
-          weight: 4,
-          opacity: 0.95,
-          lineCap: 'round',
-          lineJoin: 'round',
-        }
-      ).addTo(traceLayer)
-    })
+            const closestPoint = getClosestContourPointToPipeline(line)
 
-    depthTraceSamples.forEach((sample, index) => {
-      const marker = L.circleMarker([sample.lat, sample.lng], {
-        radius: labeledDepthSampleIndexes.has(index) ? 5 : 3,
-        weight: 2,
-        color: '#10201e',
-        fillColor: getTraceColor(sample.depthMeters),
-        fillOpacity: 0.95,
-      }).addTo(traceLayer)
+            if (closestPoint.distanceSquared < labelPoint.distanceSquared) {
+              labelPoint = closestPoint
+            }
 
-      if (labeledDepthSampleIndexes.has(index)) {
-        marker.bindTooltip(formatDepth(sample.depthMeters), {
-          permanent: true,
-          direction: 'top',
-          offset: [0, -4],
-          className: 'depth-trace-label',
+            L.polyline(line, {
+              color: '#10201e',
+              weight: 1,
+              opacity: 0.68,
+              interactive: false,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }).addTo(contourLayer)
+          })
+
+          if (labelPoint.latLng) {
+            L.tooltip({
+              permanent: true,
+              direction: 'center',
+              className: 'depth-contour-label',
+              interactive: false,
+            })
+              .setContent(`${contour.depthFeet} ft`)
+              .setLatLng(labelPoint.latLng)
+              .addTo(contourLayer)
+          }
         })
-      } else {
-        marker.bindTooltip(formatDepth(sample.depthMeters), {
-          direction: 'top',
-          offset: [0, -4],
-          className: 'depth-trace-label',
-        })
-      }
-    })
+      })
+      .catch(() => {})
 
-    return traceLayer
+    return contourLayer
   }
 
   const createDeadReckoningPoisLayer = (L) => {
@@ -657,7 +601,7 @@
         className: 'dnr-bathymetry-tile',
         attribution: 'WA DNR / USGS CoNED',
       })
-      const depthTraceLayer = createDepthTraceLayer(L)
+      const depthContourLayer = createDepthContourLayer(L)
       const deadReckoningPoisLayer = createDeadReckoningPoisLayer(L)
       const layerControlCollapsed = window.matchMedia('(max-width: 720px)').matches
 
@@ -669,8 +613,8 @@
         layers: [
           osmLayer,
           dnrBathymetryLayer,
+          depthContourLayer,
           noaaLayer,
-          depthTraceLayer,
           deadReckoningPoisLayer,
         ],
         scrollWheelZoom: true,
@@ -679,27 +623,24 @@
 
       map.on('click', (event) => {
         const coordinate = formatCoordinate(event.latlng)
-        const popup = L.popup({
-          closeButton: true,
-          className: 'gps-coordinate-popup',
-        })
-          .setLatLng(event.latlng)
-          .setContent(getGpsPopupContent(coordinate, t.diveMap.depthLoading))
-          .openOn(map)
 
-        getDepthAtLatLng(event.latlng)
-          .then((depthMeters) => {
-            const depthContent = depthMeters === null ? t.diveMap.depthUnavailable : formatDepth(depthMeters)
+        getDnrMeasurementAtLatLng(event.latlng)
+          .then((measurement) => {
+            if (!measurement) return
 
-            if (map.hasLayer(popup)) {
-              popup.setContent(getGpsPopupContent(coordinate, depthContent))
-            }
+            const measurementLabel = measurement.type === 'elevation' ? t.diveMap.elevation : t.diveMap.depth
+            const measurementContent =
+              measurement.type === 'elevation' ? formatElevation(measurement.meters) : formatDepth(measurement.meters)
+
+            L.popup({
+              closeButton: true,
+              className: 'gps-coordinate-popup',
+            })
+              .setLatLng(event.latlng)
+              .setContent(getGpsPopupContent(coordinate, measurementContent, measurementLabel))
+              .openOn(map)
           })
-          .catch(() => {
-            if (map.hasLayer(popup)) {
-              popup.setContent(getGpsPopupContent(coordinate, t.diveMap.depthUnavailable))
-            }
-          })
+          .catch(() => {})
       })
 
       if (fullSize) {
@@ -721,11 +662,11 @@
 
       L.control
         .layers(
-          { OpenStreetMap: osmLayer },
+          null,
           {
             [t.diveMap.depthLayer]: dnrBathymetryLayer,
+            [t.diveMap.depthContours]: depthContourLayer,
             [t.diveMap.noaaLayer]: noaaLayer,
-            [t.diveMap.depthTrace]: depthTraceLayer,
             [t.diveMap.deadReckoningPois]: deadReckoningPoisLayer,
           },
           {
@@ -759,11 +700,8 @@
           {t.diveMap.eyebrow}
         </p>
         <h1 class="font-greeting mt-1 text-3xl font-semibold italic leading-none text-[var(--color-text-primary)]">
-          {t.diveMap.title}
+          {t.diveMap.fullTitle}
         </h1>
-        <p class="mt-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-          {t.diveMap.depthTraceSummary}
-        </p>
       </div>
 
       <a
@@ -904,8 +842,7 @@
   }
 
   .sunnyside-map :global(.dnr-bathymetry-tile) {
-    mix-blend-mode: multiply;
-    filter: saturate(1.12) contrast(1.08);
+    mix-blend-mode: normal;
   }
 
   .sunnyside-map :global(.noaa-chart-tile) {
@@ -1021,19 +958,21 @@
     white-space: nowrap;
   }
 
-  .sunnyside-map :global(.depth-trace-label) {
-    border: 1px solid rgb(16 32 30 / 0.2);
-    background: rgb(248 250 247 / 0.9);
-    box-shadow: 0 8px 22px rgb(16 32 30 / 0.12);
-    color: var(--color-text-primary);
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+  .sunnyside-map :global(.depth-contour-label) {
+    border: 0;
+    background: rgb(248 250 247 / 0.82);
+    box-shadow: none;
+    color: #10201e;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    padding: 0.12rem 0.22rem;
+    pointer-events: none;
   }
 
-  .sunnyside-map :global(.depth-trace-label::before) {
-    border-top-color: rgb(248 250 247 / 0.9);
+  .sunnyside-map :global(.depth-contour-label::before) {
+    display: none;
   }
 
   .sunnyside-map :global(.dead-reckoning-poi-marker) {
@@ -1087,41 +1026,13 @@
   }
 
   .sunnyside-map :global(.dead-reckoning-poi-popup-content) {
-    display: grid;
-    gap: 0.65rem;
-    min-width: 14rem;
-    padding: 0.9rem 1rem;
+    gap: 0.72rem;
   }
 
-  .sunnyside-map :global(.dead-reckoning-poi-popup-content > strong) {
+  .sunnyside-map :global(.dead-reckoning-poi-popup-title) {
     color: var(--color-text-primary);
     font-size: 1rem;
-  }
-
-  .sunnyside-map :global(.dead-reckoning-poi-popup-content dl) {
-    display: grid;
-    gap: 0.42rem;
-    margin: 0;
-  }
-
-  .sunnyside-map :global(.dead-reckoning-poi-popup-content div) {
-    display: grid;
-    gap: 0.08rem;
-  }
-
-  .sunnyside-map :global(.dead-reckoning-poi-popup-content dt) {
-    color: var(--color-text-secondary);
-    font-size: 0.66rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .sunnyside-map :global(.dead-reckoning-poi-popup-content dd) {
-    margin: 0;
-    color: var(--color-text-primary);
-    font-size: 0.86rem;
-    font-weight: 700;
+    line-height: 1.15;
   }
 
   @keyframes map-reveal {
