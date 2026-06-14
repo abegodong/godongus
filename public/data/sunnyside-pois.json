@@ -1,0 +1,190 @@
+{
+  "source": "Dead Reckoning POIs sheet with WA DNR / USGS CoNED MLLW sampled depths",
+  "sheetUrl": "https://docs.google.com/spreadsheets/d/1bwaJZiFD1QsQ5QXfdTSbTdl8w-dLYUfIb04nQcGkJ3c/gviz/tq?tqx=out:csv&gid=1827903938",
+  "updatedAt": "2026-06-14T07:33:23.778Z",
+  "count": 14,
+  "pois": [
+    {
+      "id": "1",
+      "name": "Descent Buoy",
+      "sheetDepthFeet": 40,
+      "notes": "White descent buoy",
+      "lat": 47.178427,
+      "lng": -122.592021,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 12.098028183,
+        "feet": 39.69169478391372
+      }
+    },
+    {
+      "id": "2",
+      "name": "Frosty Boat",
+      "sheetDepthFeet": 43,
+      "notes": "",
+      "lat": 47.178582,
+      "lng": -122.591983,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 12.997345924,
+        "feet": 42.642212401296156
+      }
+    },
+    {
+      "id": "3",
+      "name": "Deep Swim-Through",
+      "sheetDepthFeet": 39,
+      "notes": "",
+      "lat": 47.178702212,
+      "lng": -122.591637271,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 11.838942528,
+        "feet": 38.84167620356352
+      }
+    },
+    {
+      "id": "4",
+      "name": "Bell Boat",
+      "sheetDepthFeet": 50,
+      "notes": "",
+      "lat": 47.179005554,
+      "lng": -122.591711651,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 14.696388245,
+        "feet": 48.2164984097258
+      }
+    },
+    {
+      "id": "5",
+      "name": "Octo Boat",
+      "sheetDepthFeet": 40,
+      "notes": "",
+      "lat": 47.179085602,
+      "lng": -122.591259173,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 11.97796917,
+        "feet": 39.2978003717028
+      }
+    },
+    {
+      "id": "6",
+      "name": "Junk Pile",
+      "sheetDepthFeet": 37,
+      "notes": "",
+      "lat": 47.179237272,
+      "lng": -122.590961653,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 10.780665398,
+        "feet": 35.369638264374316
+      }
+    },
+    {
+      "id": "7",
+      "name": "Engine",
+      "sheetDepthFeet": 35,
+      "notes": "",
+      "lat": 47.179359451,
+      "lng": -122.591209586,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 13.001040459,
+        "feet": 42.65433357950556
+      }
+    },
+    {
+      "id": "8",
+      "name": "Bed Frame",
+      "sheetDepthFeet": 38,
+      "notes": "",
+      "lat": 47.17890444,
+      "lng": -122.590843884,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 8.664351463,
+        "feet": 28.426350853868918
+      }
+    },
+    {
+      "id": "9",
+      "name": "Dinghy",
+      "sheetDepthFeet": 32,
+      "notes": "",
+      "lat": 47.178870736,
+      "lng": -122.591104214,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 9.807516098,
+        "feet": 32.176891114962324
+      }
+    },
+    {
+      "id": "10",
+      "name": "Washtub Drum",
+      "sheetDepthFeet": 24,
+      "notes": "",
+      "lat": 47.178719065,
+      "lng": -122.590943058,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 7.765883923,
+        "feet": 25.478622609935318
+      }
+    },
+    {
+      "id": "11",
+      "name": "Bambi Swim-Through",
+      "sheetDepthFeet": 22,
+      "notes": "",
+      "lat": 47.178605311,
+      "lng": -122.591017438,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 7.173417091,
+        "feet": 23.53483372883644
+      }
+    },
+    {
+      "id": "12",
+      "name": "Bambi",
+      "sheetDepthFeet": 12,
+      "notes": "",
+      "lat": 47.17853,
+      "lng": -122.590857,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 3.525948048,
+        "feet": 11.56807139380032
+      }
+    },
+    {
+      "id": "13",
+      "name": "Tires Swim-Through",
+      "sheetDepthFeet": 21,
+      "notes": "",
+      "lat": 47.17803654,
+      "lng": -122.591538097,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 6.056128979,
+        "feet": 19.869190199462363
+      }
+    },
+    {
+      "id": "14",
+      "name": "Tires",
+      "sheetDepthFeet": 26,
+      "notes": "from tires swim-through to tires rope intersection is 20kc, depth: 23ft",
+      "lat": 47.177893293,
+      "lng": -122.591500907,
+      "dnrMeasurement": {
+        "type": "depth",
+        "meters": 5.154009342,
+        "feet": 16.90948000960728
+      }
+    }
+  ]
+}

@@ -1,43 +1,59 @@
-# Svelte + Vite
+# godong.us
 
-This template should help get you started developing with Svelte in Vite.
+Personal website built with Svelte, Vite, Tailwind CSS, and a Cloudflare Worker for API routes.
 
-## Recommended IDE Setup
+## Development
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
-
-## Need an official Svelte framework?
-
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
-
-## Technical considerations
-
-**Why use this over SvelteKit?**
-
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
-
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `checkJs` in the JS template?**
-
-It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/sveltejs/svelte-hmr/tree/master/packages/svelte-hmr#preservation-of-local-state).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```js
-// store.js
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```sh
+npm install
+npm run dev
 ```
+
+Build for Cloudflare:
+
+```sh
+npm run build
+```
+
+## Sunnyside Dive Map Data
+
+The Sunnyside map uses self-hosted static assets for faster normal page loads:
+
+- `public/data/sunnyside-dnr-tiles/` stores the local DNR/USGS depth-shading tiles.
+- `public/data/sunnyside-pois.json` stores POIs from the Google Sheet with sampled DNR/USGS depth.
+- `public/data/sunnyside-depth-contours.json` stores the contour line overlay used by the map.
+- `public/data/sunnyside-depth-contours.geojson` stores the exported contour lines.
+
+Refresh the local POI JSON from Google Sheets and resample DNR/USGS depth:
+
+```sh
+npm run map:update-pois
+```
+
+Refresh the local DNR/USGS tile cache:
+
+```sh
+npm run map:download-dnr
+```
+
+Force a tile redownload:
+
+```sh
+npm run map:download-dnr -- --force
+```
+
+## Cloudflare POI Refresh Endpoint
+
+The Worker includes a protected endpoint:
+
+```txt
+POST /api/sunnyside/pois/update
+Authorization: Bearer <SUNNYSIDE_UPDATE_TOKEN>
+```
+
+When a `SUNNYSIDE_POIS` KV binding is configured, the endpoint refreshes the POIs from Google Sheets, samples DNR/USGS depth for each point, and saves the JSON into KV. The map reads `/api/sunnyside/pois` first and falls back to the committed static JSON if KV is not configured or unavailable.
+
+Required Cloudflare configuration for live POI refresh:
+
+- Secret or variable: `SUNNYSIDE_UPDATE_TOKEN`
+- KV binding: `SUNNYSIDE_POIS`

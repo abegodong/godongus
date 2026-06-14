@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "map:download-dnr": "node scripts/download-sunnyside-dnr-tiles.mjs",
+    "map:update-pois": "node scripts/update-sunnyside-pois.mjs",
     "preview": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy"
   },

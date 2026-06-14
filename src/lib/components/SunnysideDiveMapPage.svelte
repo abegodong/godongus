@@ -10,15 +10,14 @@
   const sunnysideBeach = [47.1787087, -122.5898493]
   const noaaChartExportUrl =
     'https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/NOAAChartDisplay/MapServer/exts/MaritimeChartService/MapServer/export'
-  const dnrBathymetryExportUrl =
-    'https://gis.dnr.wa.gov/image/rest/services/Aquatics/WA_bathymetry_CoNED_MLLW/ImageServer/exportImage'
   const dnrBathymetrySamplesUrl =
     'https://gis.dnr.wa.gov/image/rest/services/Aquatics/WA_bathymetry_CoNED_MLLW/ImageServer/getSamples'
-  const dnrBathymetryRenderingRule = JSON.stringify({ rasterFunction: 'bathy_top50m' })
   const tileSize = 256
   const earthRadius = 6378137
   const originShift = Math.PI * earthRadius
-  const deadReckoningPoisEndpoint = '/api/dead-reckoning-pois'
+  const deadReckoningPoisEndpoint = '/api/sunnyside/pois'
+  const deadReckoningPoisFallbackEndpoint = '/data/sunnyside-pois.json'
+  const dnrBathymetryTileUrl = '/data/sunnyside-dnr-tiles/{z}/{x}/{y}.png'
   const depthContoursEndpoint = '/data/sunnyside-depth-contours.json'
   const pipelineLabelReference = { lat: 47.1789348, lng: -122.5929285 }
   const contourLabelReferences = {
@@ -49,93 +48,20 @@
 
   const formatCoordinate = ({ lat, lng }) => `${lat.toFixed(6)}, ${lng.toFixed(6)}`
 
-  const parseCsv = (csv) => {
-    const rows = []
-    let row = []
-    let value = ''
-    let insideQuotes = false
-
-    for (let index = 0; index < csv.length; index += 1) {
-      const character = csv[index]
-      const nextCharacter = csv[index + 1]
-
-      if (character === '"') {
-        if (insideQuotes && nextCharacter === '"') {
-          value += '"'
-          index += 1
-        } else {
-          insideQuotes = !insideQuotes
-        }
-      } else if (character === ',' && !insideQuotes) {
-        row.push(value.trim())
-        value = ''
-      } else if ((character === '\n' || character === '\r') && !insideQuotes) {
-        if (character === '\r' && nextCharacter === '\n') {
-          index += 1
-        }
-
-        row.push(value.trim())
-        if (row.some((cell) => cell.length > 0)) {
-          rows.push(row)
-        }
-        row = []
-        value = ''
-      } else {
-        value += character
-      }
-    }
-
-    row.push(value.trim())
-    if (row.some((cell) => cell.length > 0)) {
-      rows.push(row)
-    }
-
-    return rows
-  }
-
-  const parseCoordinate = (coordinate) => {
-    const [latValue, lngValue] = coordinate.split(',').map((part) => Number(part.trim()))
-
-    if (!Number.isFinite(latValue) || !Number.isFinite(lngValue)) {
-      return null
-    }
-
-    return { lat: latValue, lng: lngValue }
-  }
-
-  const parseOptionalNumber = (value) => {
-    const parsed = Number(String(value || '').trim())
-
-    return Number.isFinite(parsed) ? parsed : null
-  }
-
   const loadDeadReckoningPois = async () => {
-    const response = await fetch(deadReckoningPoisEndpoint, { cache: 'no-store' })
+    let response = await fetch(deadReckoningPoisEndpoint, { cache: 'no-store' })
 
     if (!response.ok) {
-      throw new Error('Dead Reckoning POI sheet request failed')
+      response = await fetch(deadReckoningPoisFallbackEndpoint, { cache: 'force-cache' })
     }
 
-    const rows = parseCsv(await response.text())
+    if (!response.ok) {
+      throw new Error('Dead Reckoning POI data request failed')
+    }
 
-    return rows
-      .slice(1)
-      .map((row) => {
-        const coordinate = parseCoordinate(row[10] || '')
+    const dataset = await response.json()
 
-        if (!coordinate || !row[1]) {
-          return null
-        }
-
-        return {
-          id: row[0] || '',
-          name: row[1],
-          sheetDepthFeet: parseOptionalNumber(row[8]),
-          lat: coordinate.lat,
-          lng: coordinate.lng,
-        }
-      })
-      .filter(Boolean)
+    return dataset.pois || []
   }
 
   const loadDepthContours = async () => {
@@ -425,34 +351,6 @@
       },
     })
 
-  const createDnrBathymetryLayer = (L) =>
-    L.GridLayer.extend({
-      createTile(coords, done) {
-        const tile = document.createElement('img')
-        const params = new URLSearchParams({
-          bbox: tileBoundsToWebMercatorBbox(coords),
-          bboxSR: '3857',
-          imageSR: '3857',
-          size: `${tileSize},${tileSize}`,
-          format: 'png32',
-          transparent: 'true',
-          renderingRule: dnrBathymetryRenderingRule,
-          f: 'image',
-        })
-
-        tile.alt = ''
-        tile.className = 'dnr-bathymetry-tile'
-        tile.decoding = 'async'
-        tile.width = tileSize
-        tile.height = tileSize
-        tile.onload = () => done(null, tile)
-        tile.onerror = () => done(new Error('DNR bathymetry tile failed to load'), tile)
-        tile.src = `${dnrBathymetryExportUrl}?${params.toString()}`
-
-        return tile
-      },
-    })
-
   const createRecenterControl = (L) =>
     L.Control.extend({
       onAdd(currentMap) {
@@ -544,26 +442,17 @@
             })
 
           marker.on('popupopen', (event) => {
-            getDepthAtLatLng(poi)
-              .then((depthMeters) => {
-                const differenceFeet = getDepthDifferenceFeet(poi.sheetDepthFeet, depthMeters)
-                marker.setIcon(createPoiMarkerIcon(L, poi, differenceFeet))
-                event.popup.setContent(getDeadReckoningPoiPopupContent(poi, depthMeters))
-              })
-              .catch(() => {
-                event.popup.setContent(getDeadReckoningPoiPopupContent(poi, null))
-              })
+            const depthMeters = poi.dnrMeasurement?.type === 'depth' ? poi.dnrMeasurement.meters : null
+            const differenceFeet = getDepthDifferenceFeet(poi.sheetDepthFeet, depthMeters)
+
+            marker.setIcon(createPoiMarkerIcon(L, poi, differenceFeet))
+            event.popup.setContent(getDeadReckoningPoiPopupContent(poi, depthMeters))
           })
 
-          getDepthAtLatLng(poi)
-            .then((depthMeters) => {
-              const differenceFeet = getDepthDifferenceFeet(poi.sheetDepthFeet, depthMeters)
+          const depthMeters = poi.dnrMeasurement?.type === 'depth' ? poi.dnrMeasurement.meters : null
+          const differenceFeet = getDepthDifferenceFeet(poi.sheetDepthFeet, depthMeters)
 
-              marker.setIcon(createPoiMarkerIcon(L, poi, differenceFeet))
-            })
-            .catch(() => {
-              marker.setIcon(createPoiMarkerIcon(L, poi))
-            })
+          marker.setIcon(createPoiMarkerIcon(L, poi, differenceFeet))
         })
       })
       .catch(() => {
@@ -588,7 +477,6 @@
       if (!mapElement || cancelled) return
 
       const NoaaChartLayer = createNoaaChartLayer(L)
-      const DnrBathymetryLayer = createDnrBathymetryLayer(L)
       const osmLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxNativeZoom: 19,
         maxZoom: 24,
@@ -599,8 +487,11 @@
         opacity: 0.82,
         attribution: 'NOAA Office of Coast Survey',
       })
-      const dnrBathymetryLayer = new DnrBathymetryLayer({
+      const dnrBathymetryLayer = L.tileLayer(dnrBathymetryTileUrl, {
         tileSize,
+        minZoom: 11,
+        maxNativeZoom: 20,
+        maxZoom: 24,
         opacity: 0.62,
         className: 'dnr-bathymetry-tile',
         attribution: 'WA DNR / USGS CoNED',
